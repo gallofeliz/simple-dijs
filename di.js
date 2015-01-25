@@ -7,7 +7,7 @@ var Di = function (/*values*/) {
 };
 
 Di.prototype = {
-	_has: function (id) {
+	has: function (id) {
 		return typeof this._definitions[id] === 'undefined' ? false : true;
 	},
 	_single: function (func) {
@@ -19,7 +19,7 @@ Di.prototype = {
 	set: function (id, funcOrValue) {
 		assert(arguments.length >= 2, 'Two arguments required');
 		assert(typeof id === 'string', 'Expected string id');
-		assert.equal(this._has(id), false, format('Identifier "%s" already defined', id));
+		assert.equal(this.has(id), false, format('Identifier "%s" already defined', id));
 
 		var isFunction = typeof funcOrValue === 'function',
 			isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
@@ -34,7 +34,7 @@ Di.prototype = {
 	get: function (id) {
 		assert(arguments.length >= 1, 'One argument required');
 		assert(typeof id === 'string', 'Expected string id');
-		assert.equal(this._has(id), true, format('Identifier "%s" is not defined', id));
+		assert.equal(this.has(id), true, format('Identifier "%s" is not defined', id));
 
 		var definition = this._definitions[id],
 			hasValue = Object.keys(definition).indexOf('value') !== -1;
