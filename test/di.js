@@ -114,6 +114,18 @@ describe('Di', function() {
 
     });
 
+    describe('#has', function () {
+        it('Call when has', function () {
+            di.set('myId', 1);
+            assert.equal(di.has('myId'), true);
+
+        });
+
+        it('Call when has not', function () {
+            assert.equal(di.has('myId'), false);
+        });
+    })
+
     describe('#factory', function () {
 
         it('Call without argument', function () {
