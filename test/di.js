@@ -6,9 +6,9 @@ describe('Di', function() {
     var di;
 
     beforeEach(function () {
-        di = new Di;
+        di = new Di();
         di.set('trap', 'trap');
-    })
+    });
 
     describe('#set', function () {
 
@@ -128,7 +128,7 @@ describe('Di', function() {
         it('Call when has not', function () {
             assert.equal(di.has('myId'), false);
         });
-    })
+    });
 
     describe('#factory', function () {
 
