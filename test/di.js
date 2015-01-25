@@ -105,10 +105,8 @@ describe('Di', function() {
     describe('#keys', function () {
 
         it('Call (normal)', function () {
-
             di.set('one', 1);
             di.set('two', function () { return 2; });
-
             assert.deepEqual(di.keys().sort(), ['trap', 'one', 'two'].sort());
         });
 
