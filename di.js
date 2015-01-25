@@ -53,17 +53,18 @@ Di.prototype = {
 			return this.value;
 		};
 	}
-	/*protect: function (func) {
+	/*
+	protect: function (func) {
 	},
 	raw: function (id) {
 	},
 	extend: function (id, func) {
 	},
-	has: function (id) {
-	},
 	remove: function ($id) {
 	},
 	*/
 };
+
+Di.prototype.register = Di.prototype.set;
 
 module.exports = Di;
