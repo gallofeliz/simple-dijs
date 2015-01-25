@@ -60,9 +60,10 @@ Di.prototype = {
 	},
 	remove: function ($id) {
 	},
-	keys: function () {
-	}
 	*/
+	keys: function () {
+		return Object.keys(this._definitions);
+	}
 };
 
 module.exports = Di;
