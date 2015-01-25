@@ -1,5 +1,5 @@
 {
-  "name": "di",
+  "name": "simple-dijs",
   "version": "1.0.0",
   "description": "Di container (pimple like)",
   "main": "di.js",
