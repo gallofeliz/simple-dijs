@@ -1,0 +1,17 @@
+{
+  "name": "di",
+  "version": "1.0.0",
+  "description": "Di container (pimple like)",
+  "main": "di.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Aubin VIGHIER",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^2.1.0"
+  }
+}
