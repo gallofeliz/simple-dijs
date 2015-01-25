@@ -50,6 +50,12 @@ describe('Di', function() {
 
     });
 
+    it('#register alias of #set', function () {
+        assert.equal(di.register, di.set);
+        di.register('something', 1);
+        assert.equal(di.get('something'), 1);
+    });
+
     describe('#get', function () {
 
         it('Call without argument', function () {
