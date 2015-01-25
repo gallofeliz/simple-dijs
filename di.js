@@ -10,12 +10,6 @@ Di.prototype = {
 	has: function (id) {
 		return typeof this._definitions[id] === 'undefined' ? false : true;
 	},
-	_single: function (func) {
-		return function (di) {
-			this.value = func(di);
-			return this.value;
-		};
-	},
 	set: function (id, funcOrValue) {
 		assert(arguments.length >= 2, 'Two arguments required');
 		assert(typeof id === 'string', 'Expected string id');
@@ -50,6 +44,15 @@ Di.prototype = {
 
 		return func;
 	},
+	keys: function () {
+		return Object.keys(this._definitions);
+	},
+	_single: function (func) {
+		return function (di) {
+			this.value = func(di);
+			return this.value;
+		};
+	}
 	/*protect: function (func) {
 	},
 	raw: function (id) {
@@ -61,9 +64,6 @@ Di.prototype = {
 	remove: function ($id) {
 	},
 	*/
-	keys: function () {
-		return Object.keys(this._definitions);
-	}
 };
 
 module.exports = Di;
