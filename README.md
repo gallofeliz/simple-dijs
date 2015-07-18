@@ -1,6 +1,6 @@
 # dijs (npm simple-dijs)
 
-TDD devlopment with Pimple as sample.
+TDD devlopment with Pimple as sample. [![Build Status](https://travis-ci.org/Devlopnet/dijs.svg?branch=develop)](https://travis-ci.org/Devlopnet/dijs)
 
 Read the tests for documentation. You can also read the next presentation.
 
