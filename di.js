@@ -1,12 +1,26 @@
 var assert = require('assert');
 var format = require('util').format;
 
-var Di = function (/*values*/) {
+var Di = function (values) {
     this._definitions = {};
     this._factory = [];
+
+    if (values) {
+        this.batchSet(values);
+    }
 };
 
 Di.prototype = {
+    batchSet: function (values) {
+        var that = this;
+        assert(arguments.length >= 1, 'One argument required');
+        assert(typeof values === 'object' && values !== null, 'Expected argument values to be Object');
+        Object.keys(values).forEach(function (id) {
+            that.set(id, values[id]);
+        });
+
+        return this;
+    },
     has: function (id) {
         return typeof this._definitions[id] === 'undefined' ? false : true;
     },
