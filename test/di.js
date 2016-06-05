@@ -10,6 +10,52 @@ describe('Di', function() {
         di.set('trap', 'trap');
     });
 
+    describe('constructor', function () {
+        it('Call with arg values', function () {
+            /* Proxy of batchSet / can use mock - Only this test, see #batchSet */
+            di = new Di({
+                'myId': 'something',
+                'myId2': 'something-else'
+            });
+
+            assert.equal(di.get('myId'), 'something');
+            assert.equal(di.get('myId2'), 'something-else');
+        });
+    });
+
+    describe('#batchSet', function () {
+        it('Call without required arguments', function () {
+            try {
+                di.batchSet();
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.equal(e.message, 'One argument required');
+            }
+        });
+
+        it('Call with non-object values', function () {
+            try {
+                di.batchSet('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.equal(e.message, 'Expected argument values to be Object');
+            }
+        });
+
+        it('Call (normal)', function () {
+            var returned = di.batchSet({
+                'myId': 'something',
+                'myId2': 'something-else'
+            });
+
+            assert.equal(returned, di);
+            assert.equal(di.get('myId'), 'something');
+            assert.equal(di.get('myId2'), 'something-else');
+        });
+    });
+
     describe('#set', function () {
 
         it('Call without required arguments', function () {
