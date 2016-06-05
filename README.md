@@ -19,6 +19,14 @@ Read the tests for documentation. You can also read the next presentation.
     // So, ...
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // The same UserCollection instance
+
+    // Also during construction and method batchSet
+    new Di({
+        'database': function () { ... },
+        'userCollection', function (di) { ... }
+    });
+
+    di.batchSet({ ..same than construct.. });
     
     // If you want to factory instead of return the same object :
     di.set('userCollection', di.factory(function (di) {
