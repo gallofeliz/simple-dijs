@@ -23,7 +23,7 @@ Read the tests for documentation. You can also read the next presentation.
     // Also during construction and method batchSet
     new Di({
         'database': function () { ... },
-        'userCollection', function (di) { ... }
+        'userCollection': function (di) { ... }
     });
 
     di.batchSet({ ..same than construct.. });
