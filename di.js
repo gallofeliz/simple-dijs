@@ -21,7 +21,10 @@ Di.prototype = {
         this._definitions[id] = isFunction ?
                                 { func: isInFactory ? funcOrValue : this._single(funcOrValue) } :
                                 { value: funcOrValue };
-        this._factory = [];
+
+        if (isInFactory) {
+            this._factory.splice(this._factory.indexOf(funcOrValue), 1);
+        }
 
         return this;
     },

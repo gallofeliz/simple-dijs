@@ -164,6 +164,30 @@ describe('Di', function() {
             assert.notEqual(firstCall, secondCall);
         });
 
+        it('Call (normal) queue with #set', function () {
+            var factoryMyId = di.factory(function () {
+                    return ['something'];
+                }),
+                factoryMyId2 = di.factory(function () {
+                    return ['something-else'];
+                });
+
+            di.set('myId', factoryMyId)
+              .set('myId2', factoryMyId2);
+
+            var firstCallMyId = di.get('myId');
+            var secondCallMyId = di.get('myId');
+            assert.deepEqual(firstCallMyId, ['something']);
+            assert.deepEqual(secondCallMyId, ['something']);
+            assert.notEqual(firstCallMyId, secondCallMyId);
+
+            var firstCallMyId2 = di.get('myId2');
+            var secondCallMyId2 = di.get('myId2');
+            assert.deepEqual(firstCallMyId2, ['something-else']);
+            assert.deepEqual(secondCallMyId2, ['something-else']);
+            assert.notEqual(firstCallMyId2, secondCallMyId2);
+        });
+
     });
 
     it('Integration test', function () {
