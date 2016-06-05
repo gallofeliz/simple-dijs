@@ -18,8 +18,8 @@ describe('Di', function() {
                 'myId2': 'something-else'
             });
 
-            assert.equal(di.get('myId'), 'something');
-            assert.equal(di.get('myId2'), 'something-else');
+            assert.strictEqual(di.get('myId'), 'something');
+            assert.strictEqual(di.get('myId2'), 'something-else');
         });
     });
 
@@ -30,7 +30,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'One argument required');
+                assert.strictEqual(e.message, 'One argument required');
             }
         });
 
@@ -40,7 +40,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Expected argument values to be Object');
+                assert.strictEqual(e.message, 'Expected argument values to be Object');
             }
         });
 
@@ -50,9 +50,9 @@ describe('Di', function() {
                 'myId2': 'something-else'
             });
 
-            assert.equal(returned, di);
-            assert.equal(di.get('myId'), 'something');
-            assert.equal(di.get('myId2'), 'something-else');
+            assert.strictEqual(returned, di);
+            assert.strictEqual(di.get('myId'), 'something');
+            assert.strictEqual(di.get('myId2'), 'something-else');
         });
     });
 
@@ -64,7 +64,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Two arguments required');
+                assert.strictEqual(e.message, 'Two arguments required');
             }
         });
 
@@ -74,7 +74,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected string id');
             }
         });
 
@@ -85,21 +85,23 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Identifier "myId" already defined');
+                assert.strictEqual(e.message, 'Identifier "myId" already defined');
             }
         });
 
         it('Call (normal)', function () {
-            di.set('myId', 'something');
-            assert.equal(di.get('myId'), 'something');
+            var returned = di.set('myId', 'something');
+            assert.strictEqual(di.get('myId'), 'something');
+            assert.strictEqual(returned, di);
         });
 
     });
 
     it('#register alias of #set', function () {
-        assert.equal(di.register, di.set);
-        di.register('something', 1);
-        assert.equal(di.get('something'), 1);
+        assert.strictEqual(di.register, di.set);
+        var returned = di.register('something', 1);
+        assert.strictEqual(di.get('something'), 1);
+        assert.strictEqual(returned, di);
     });
 
     describe('#get', function () {
@@ -110,7 +112,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'One argument required');
+                assert.strictEqual(e.message, 'One argument required');
             }
         });
 
@@ -120,7 +122,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected string id');
             }
         });
 
@@ -130,24 +132,24 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Identifier "myId" is not defined');
+                assert.strictEqual(e.message, 'Identifier "myId" is not defined');
             }
         });
 
         it('Call with existing id having value', function () {
             di.set('myId', 'something');
-            assert.equal(di.get('myId'), 'something');
+            assert.strictEqual(di.get('myId'), 'something');
         });
 
         it('Call with existing id having function', function () {
             var returnDi = di.set('myId', function (injectedDi) {
-                assert.equal(injectedDi, di);
+                assert.strictEqual(injectedDi, di);
                 return ['something'];
             });
 
             var firstCall = di.get('myId');
             var secondCall = di.get('myId');
-            assert.equal(firstCall, secondCall);
+            assert.strictEqual(firstCall, secondCall);
             assert.deepEqual(firstCall, ['something']);
             assert(returnDi, di);
         });
@@ -167,12 +169,12 @@ describe('Di', function() {
     describe('#has', function () {
         it('Call when has', function () {
             di.set('myId', 1);
-            assert.equal(di.has('myId'), true);
+            assert.strictEqual(di.has('myId'), true);
 
         });
 
         it('Call when has not', function () {
-            assert.equal(di.has('myId'), false);
+            assert.strictEqual(di.has('myId'), false);
         });
     });
 
@@ -184,7 +186,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'One argument required');
+                assert.strictEqual(e.message, 'One argument required');
             }
         });
 
@@ -194,7 +196,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.equal(e.message, 'Expected function func');
+                assert.strictEqual(e.message, 'Expected function func');
             }
         });
 
@@ -253,7 +255,7 @@ describe('Di', function() {
             };
         });
 
-        assert.equal(di.get('userService').getName(1), 'Paul');
+        assert.strictEqual(di.get('userService').getName(1), 'Paul');
     });
 
 });
