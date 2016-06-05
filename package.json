@@ -1,6 +1,6 @@
 {
   "name": "simple-dijs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Di container (pimple like)",
   "main": "di.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Devlopnet/dijs.git"
+    "url": "git://github.com/avighier/dijs.git"
   },
   "scripts": {
     "test": "./node_modules/jshint/bin/jshint di.js test/di.js && ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha"
