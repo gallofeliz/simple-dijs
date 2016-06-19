@@ -1,14 +1,14 @@
 {
   "name": "simple-dijs",
   "version": "1.1.1",
-  "description": "Di container (pimple like)",
+  "description": "Simple Javascript Dependency Injection Container (DI) like Pimple",
   "main": "di.js",
   "directories": {
     "test": "test"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/avighier/dijs.git"
+    "url": "git://github.com/avighier/simple-dijs.git"
   },
   "scripts": {
     "test": "./node_modules/jshint/bin/jshint di.js test/di.js && ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha"
@@ -18,7 +18,9 @@
     "injection",
     "DI",
     "dependency injection",
-    "dependency-injection"
+    "dependency-injection",
+    "pimple",
+    "container"
   ],
   "author": "Aubin VIGHIER",
   "license": "ISC",
