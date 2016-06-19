@@ -1,8 +1,6 @@
 # simple-dijs
 
-TDD devlopment with Pimple as sample. [![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
-
-Read the tests for documentation. You can also read the next presentation.
+Please visit our website to full documentation https://avighier.github.io/simple-dijs/
 
 ```javascript
     var Di = require('simple-dijs');
@@ -68,6 +66,4 @@ Read the tests for documentation. You can also read the next presentation.
     });
 ```
 
-Devlopment :
-- npm test must return OK
-- your code must be well tested
+[![](https://avighier.piwikpro.com/piwik.php?idsite=7&rec=1)]()
