@@ -171,4 +171,13 @@ Di.prototype = {
 
 Di.prototype.register = Di.prototype.set;
 
-module.exports = Di;
+switch (true) {
+    case typeof module !== 'undefined' && typeof module.exports !== 'undefined':
+        module.exports = Di;
+        break;
+    case typeof define === 'function' && define.amd:
+        define([], function () { return Di; });
+        break;
+    default:
+        window.Di = Di;
+}
