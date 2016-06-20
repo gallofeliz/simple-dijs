@@ -6,12 +6,19 @@
   "directories": {
     "test": "test"
   },
+  "bugs": {
+    "url": "https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug"
+  },
+  "homepage": "https://avighier.github.io/simple-dijs",
   "repository": {
     "type": "git",
     "url": "git://github.com/avighier/simple-dijs.git"
   },
   "scripts": {
-    "test": "bash -c 'node_modules/jshint/bin/jshint di.js test/di.js' && bash -c 'node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha' && bash -c 'node_modules/.bin/jsdoc di.js -t node_modules/docdash/ -d api_doc'"
+    "test": "bash -c 'node_modules/jshint/bin/jshint di.js test/di.js' && bash -c 'node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha'",
+    "browser": "bash -c 'node_modules/.bin/browserify di.js --standalone Di -o browser/di.js' && bash -c 'node_modules/.bin/uglifyjs --compress -o browser/di.min.js -- browser/di.js'",
+    "doc": "bash -c 'node_modules/.bin/jsdoc di.js -t node_modules/docdash/ -d api_doc'",
+    "build": "npm run browser && npm run test && npm run doc"
   },
   "keywords": [
     "dependency",
@@ -25,10 +32,12 @@
   "author": "Aubin VIGHIER",
   "license": "ISC",
   "devDependencies": {
+    "browserify": "^13.0.1",
     "docdash": "^0.4.0",
     "istanbul": "^0.3.5",
     "jsdoc": "^3.4.0",
     "jshint": "^2.6.0",
-    "mocha": "^2.1.0"
+    "mocha": "^2.1.0",
+    "uglify-js": "^2.6.3"
   }
 }
