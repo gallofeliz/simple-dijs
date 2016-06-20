@@ -1,5 +1,8 @@
-var assert = require('assert');
-var format = require('util').format;
+var assert = function (condition, errorMessage) {
+    if (!condition) {
+        throw new Error(errorMessage);
+    }
+};
 
 /**
     Create a new Container
@@ -82,7 +85,7 @@ Di.prototype = {
     set: function (id, funcOrValue) {
         assert(arguments.length >= 2, 'Two arguments required');
         assert(typeof id === 'string', 'Expected string id');
-        assert.equal(this.has(id), false, format('Identifier "%s" already defined', id));
+        assert(this.has(id) === false, 'Identifier "%s" already defined'.replace('%s', id));
 
         var isFunction = typeof funcOrValue === 'function',
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
@@ -114,7 +117,7 @@ Di.prototype = {
     get: function (id) {
         assert(arguments.length >= 1, 'One argument required');
         assert(typeof id === 'string', 'Expected string id');
-        assert.equal(this.has(id), true, format('Identifier "%s" is not defined', id));
+        assert(this.has(id) === true, 'Identifier "%s" is not defined'.replace('%s', id));
 
         var definition = this._definitions[id],
             hasValue = Object.keys(definition).indexOf('value') !== -1;
