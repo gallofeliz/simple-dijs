@@ -6,6 +6,10 @@
   "directories": {
     "test": "test"
   },
+  "bugs": {
+    "url" : "https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug"
+  },
+  "homepage": "https://avighier.github.io/simple-dijs",
   "repository": {
     "type": "git",
     "url": "git://github.com/avighier/simple-dijs.git"
