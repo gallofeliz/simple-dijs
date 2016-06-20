@@ -1,6 +1,6 @@
 # simple-dijs
 
-Please visit our website to full documentation https://avighier.github.io/simple-dijs/
+Please visit our website for full documentation https://avighier.github.io/simple-dijs/
 
 ```javascript
     var Di = require('simple-dijs');
