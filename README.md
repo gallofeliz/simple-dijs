@@ -3,7 +3,15 @@
 Please visit our website for full documentation https://avighier.github.io/simple-dijs/
 
 ```javascript
+    // NodeJs
     var Di = require('simple-dijs');
+```
+
+```html
+    <script src="simple-dijs/browser/di.min.js" type="text/javascript"></script>
+```    
+
+```javascript
     var di = new Di();
     
     di.set('database', function () {
