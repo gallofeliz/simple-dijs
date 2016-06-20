@@ -1,43 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>di.js - Documentation</title>
-
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
-</head>
-<body>
-
-<input type="checkbox" id="nav-trigger" class="nav-trigger" />
-<label for="nav-trigger" class="navicon-button x">
-  <div class="navicon"></div>
-</label>
-
-<label for="nav-trigger" class="overlay"></label>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Di.html">Di</a><ul class='methods'><li data-type='method'><a href="Di.html#batchSet">batchSet</a></li><li data-type='method'><a href="Di.html#factory">factory</a></li><li data-type='method'><a href="Di.html#get">get</a></li><li data-type='method'><a href="Di.html#has">has</a></li><li data-type='method'><a href="Di.html#keys">keys</a></li><li data-type='method'><a href="Di.html#set">set</a></li></ul></li></ul>
-</nav>
-
-<div id="main">
-    
-    <h1 class="page-title">di.js</h1>
-    
-
-    
-
-
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>var assert = function (condition, errorMessage) {
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Di = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var assert = function (condition, errorMessage) {
     if (!condition) {
         throw new Error(errorMessage);
     }
@@ -47,7 +9,7 @@
     Create a new Container
 
     @constructor
-    @param [values] {Object.&lt;string, *>} Values to set on construction (eqiv batchSet {@link Di#batchSet})
+    @param [values] {Object.<string, *>} Values to set on construction (eqiv batchSet {@link Di#batchSet})
     @example
         var di = new Di()
     *@example
@@ -69,7 +31,7 @@ Di.prototype = {
     /**
         Multiple set values
 
-        @param values {Object.&lt;string, *>} Values to set
+        @param values {Object.<string, *>} Values to set
         @throws {Error} If values is not provided or not Object
         @returns {Di} himself
         @example
@@ -81,7 +43,7 @@ Di.prototype = {
     batchSet: function (values) {
         var that = this;
         assert(arguments.length >= 1, 'One argument required');
-        assert(typeof values === 'object' &amp;&amp; values !== null, 'Expected argument values to be Object');
+        assert(typeof values === 'object' && values !== null, 'Expected argument values to be Object');
         Object.keys(values).forEach(function (id) {
             that.set(id, values[id]);
         });
@@ -106,17 +68,17 @@ Di.prototype = {
         @returns {Di} himself
         @throws {Error} if missing or incorrect arguments
         @throws {Error} if Id is already registered
-        @example &lt;caption>Set a raw value&lt;/caption>
+        @example <caption>Set a raw value</caption>
             *di.set('color', '#ff0000')
-        *@example &lt;caption>Set a building function (value with be cached after first call)&lt;/caption>
+        *@example <caption>Set a building function (value with be cached after first call)</caption>
             *di.set('database', function (di) {
             *   return new Database(di.get('database_url'));
             *})
-        *@example &lt;caption>Set a factory function (value will be factoryed each call)&lt;/caption>
+        *@example <caption>Set a factory function (value will be factoryed each call)</caption>
             *di.set('token', di.factory(function () {
             *   return new Token();
             *}))
-        *@example &lt;caption>Set a building function that returns a promise&lt;/caption>
+        *@example <caption>Set a building function that returns a promise</caption>
             *di.set('config', function () {
             *   return fsPromise.readFile('config.json');
             *})
@@ -127,7 +89,7 @@ Di.prototype = {
         assert(this.has(id) === false, 'Identifier "%s" already defined'.replace('%s', id));
 
         var isFunction = typeof funcOrValue === 'function',
-            isInFactory = isFunction &amp;&amp; this._factory.indexOf(funcOrValue) !== -1;
+            isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
         this._definitions[id] = isFunction ?
                                 { func: isInFactory ? funcOrValue : this._single(funcOrValue) } :
@@ -210,22 +172,6 @@ Di.prototype = {
 
 Di.prototype.register = Di.prototype.set;
 
-module.exports = Di;</code></pre>
-        </article>
-    </section>
-
-
-
-
-</div>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Jun 20 2016 04:21:41 GMT-0500 (Centre (heure d’été, Mexique)) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
-</footer>
-
-<script>prettyPrint();</script>
-<script src="scripts/linenumber.js"></script>
-</body>
-</html>
+module.exports = Di;
+},{}]},{},[1])(1)
+});
