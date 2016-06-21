@@ -2,14 +2,26 @@
 
 Please visit our website for full documentation https://avighier.github.io/simple-dijs/
 
+##Install
+
+You can install from NPM and Bower (or directly).
+
+```bash
+    npm install --save simple-dijs
+    // or
+    bower install --save simple-dijs
+```
+
+## Integration
+
 ```javascript
     // NodeJs
     var Di = require('simple-dijs');
 ```
 
 ```html
-    <!-- Browser -->
-    <script src="simple-dijs/browser/di.min.js" type="text/javascript"></script>
+    <!-- Bower, available global or ADM (requirejs) -->
+    <script src="bower_components/simple-dijs/dist/di.js" type="text/javascript"></script>
 ```    
 
 ```javascript

@@ -1,7 +1,7 @@
 {
   "name": "simple-dijs",
   "description": "Simple Javascript Dependency Injection Container (DI) like Pimple",
-  "main": "di.js",
+  "main": "browser/di.js",
   "dependencies": {
   },
   "devDependencies": {
@@ -26,7 +26,11 @@
   "license": "ISC",
   "ignore": [
     "node_modules",
-    "test"
+    "test",
+    "api_doc",
+    ".gitignore",
+    ".travis.yml",
+    "package.json"
   ],
   "homepage": "https://avighier.github.io/simple-dijs"
 }

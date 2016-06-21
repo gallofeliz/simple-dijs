@@ -1,5 +1,5 @@
 var assert = require("assert");
-var Di = typeof window !== 'undefined' ? window.Di : require('../di');
+var Di = require('../di');
 
 describe('Di', function() {
 
