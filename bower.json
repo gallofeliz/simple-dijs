@@ -1,0 +1,32 @@
+{
+  "name": "simple-dijs",
+  "description": "Simple Javascript Dependency Injection Container (DI) like Pimple",
+  "main": "di.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "dependency",
+    "injection",
+    "DI",
+    "dependency injection",
+    "dependency-injection",
+    "pimple",
+    "container"
+  ],
+  "authors": [
+    "Aubin VIGHIER"
+  ],
+  "license": "ISC",
+  "ignore": [
+    "node_modules",
+    "test"
+  ],
+  "homepage": "https://avighier.github.io/simple-dijs"
+}
