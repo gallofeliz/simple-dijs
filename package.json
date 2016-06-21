@@ -2,7 +2,7 @@
   "name": "simple-dijs",
   "version": "1.5.0",
   "description": "Simple Javascript Dependency Injection Container (DI) like Pimple",
-  "main": "di.js",
+  "main": "dist/di.js",
   "directories": {
     "test": "test"
   },
@@ -15,11 +15,12 @@
     "url": "git://github.com/avighier/simple-dijs.git"
   },
   "scripts": {
-    "test": "bash -c 'node_modules/jshint/bin/jshint di.js test/di.js' && bash -c 'node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha'",
-    "browser-build": "bash -c 'node_modules/.bin/browserify di.js --standalone Di -o browser/di.js' && bash -c 'node_modules/.bin/uglifyjs --compress -o browser/di.min.js -- browser/di.js'",
+    "test": "bash -c 'node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha' && npm run browser-test",
+    "browser-test": "bash -c 'node_modules/.bin/browserify test/di.js -o test/browser/di.js' && bash -c 'node_modules/.bin/mocha-phantomjs test/browser/browser.html' && rm test/browser/di.js",
     "doc": "bash -c 'node_modules/.bin/jsdoc di.js -t node_modules/docdash/ -d api_doc'",
-    "browser-test": "bash -c 'node_modules/.bin/browserify test/di.js --exclude di.js -o test/browser/di.js' && bash -c 'node_modules/.bin/mocha-phantomjs test/browser/browser.html'",
-    "build": "npm run test && npm run browser-build && npm run browser-test && npm run doc"
+    "build-dist": "bash -c 'node_modules/.bin/browserify di.js --standalone Di -o dist/di.js'",
+    "jshint": "bash -c 'node_modules/jshint/bin/jshint di.js test/di.js'",
+    "build": "npm run build-dist && npm run jshint && npm run test && npm run doc"
   },
   "keywords": [
     "dependency",
@@ -40,7 +41,6 @@
     "jsdoc": "^3.4.0",
     "jshint": "^2.6.0",
     "mocha": "^2.1.0",
-    "mocha-phantomjs": "^4.1.0",
-    "uglify-js": "^2.6.3"
+    "mocha-phantomjs": "^4.1.0"
   }
 }

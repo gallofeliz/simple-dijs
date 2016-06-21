@@ -4,12 +4,25 @@
 	</head>
 	<body>
 		<div id="mocha"></div>
-	    <script src="http://cdn.rawgit.com/mochajs/mocha/2.1.0/mocha.js"></script>
-		<script src="../../browser/di.min.js"></script>
+
+	    <script src="../../dist/di.js"></script>
+		<script>
+			if (typeof window.Di === 'undefined') {
+				throw new Error('global not working');
+			}
+		</script>
+
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+		<script src="http://cdn.rawgit.com/mochajs/mocha/2.1.0/mocha.js"></script>
 		<script>mocha.setup('bdd')</script>
 		<script src="di.js"></script>
 		<script>
-    		mocha.run();
+			requirejs(["../../dist/di.js"], function(Di) {
+				if (typeof Di === 'undefined') {
+					throw new Error('AMD not working');
+				}
+	    		mocha.run();
+			});
 		</script>
 	</body>
 </html>
