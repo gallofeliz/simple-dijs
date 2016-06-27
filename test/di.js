@@ -201,7 +201,8 @@ describe('Di', function() {
         });
 
         it('Call (normal) with #set', function () {
-            di.set('myId', di.factory(function () {
+            di.set('myId', di.factory(function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
                 return ['something'];
             }));
 
@@ -213,10 +214,12 @@ describe('Di', function() {
         });
 
         it('Call (normal) queue with #set', function () {
-            var factoryMyId = di.factory(function () {
+            var factoryMyId = di.factory(function (injectedDi) {
+                    assert.strictEqual(injectedDi, di);
                     return ['something'];
                 }),
-                factoryMyId2 = di.factory(function () {
+                factoryMyId2 = di.factory(function (injectedDi) {
+                    assert.strictEqual(injectedDi, di);
                     return ['something-else'];
                 });
 
