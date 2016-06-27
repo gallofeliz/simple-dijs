@@ -17,7 +17,7 @@
   "scripts": {
     "test": "bash -c 'node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha' && npm run browser-test",
     "browser-test": "bash -c 'node_modules/.bin/browserify test/di.js -o test/browser/di.js' && bash -c 'node_modules/.bin/mocha-phantomjs test/browser/browser.html' && rm test/browser/di.js",
-    "doc": "bash -c 'node_modules/.bin/jsdoc di.js -t node_modules/docdash/ -d api_doc'",
+    "doc": "bash -c 'node_modules/.bin/jsdoc di.js -t node_modules/docdash/ -d doc'",
     "build-dist": "bash -c 'node_modules/.bin/browserify di.js --standalone Di -o dist/di.js'",
     "jshint": "bash -c 'node_modules/jshint/bin/jshint di.js test/di.js'",
     "build": "npm run build-dist && npm run jshint && npm run test && npm run doc"
