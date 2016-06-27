@@ -177,8 +177,6 @@ Di.prototype = {
         };
     }
     /*
-    raw: function (id) {
-    },
     extend: function (id, func) {
     },
     remove: function ($id) {
