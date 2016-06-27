@@ -20,7 +20,7 @@
     "doc": "bash -c 'node_modules/.bin/jsdoc src/di.js -t node_modules/docdash/ -d doc'",
     "build-dist": "bash -c 'mkdir -p dist' && bash -c 'node_modules/.bin/browserify src/di.js --standalone Di -o dist/di.js'",
     "jshint": "bash -c 'node_modules/jshint/bin/jshint src/di.js test/di.js'",
-    "build": "npm run build-dist && npm run jshint && npm run test && npm run doc",
+    "build": "npm run build-dist && npm run jshint && npm run test",
     "prepublish": "npm run build"
   },
   "keywords": [
