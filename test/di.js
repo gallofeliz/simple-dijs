@@ -1,5 +1,5 @@
 var assert = require("assert");
-var Di = require('../di');
+var Di = require('../dist/di');
 
 describe('Di', function() {
 
