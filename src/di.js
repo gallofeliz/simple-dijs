@@ -156,10 +156,27 @@ Di.prototype = {
             this.value = func(di);
             return this.value;
         };
+    },
+    /**
+        Protect a function to store as raw
+        @see Di#set
+        @param func {Function} The function to factory
+        @returns {Function} The protected function
+        @throws {Error} Missing or incorrect argument
+        @example
+            *di.set('math.add', di.protect(function (a, b) {
+            *   return a + b;
+            *}))
+    */
+    protect: function (func) {
+        assert(arguments.length >= 1, 'One argument required');
+        assert(typeof func === 'function', 'Expected function func');
+
+        return function () {
+            return func;
+        };
     }
     /*
-    protect: function (func) {
-    },
     raw: function (id) {
     },
     extend: function (id, func) {

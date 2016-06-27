@@ -62,20 +62,11 @@ You can install from NPM or directly (manual build : `npm run build`)
     di.set('port', 80);
     di.get('port'); // 80
     
-    // But actually, you have to protect yourself raw functions (this will be protect() method) :
-    di.set('math.add', function (a, b) {
+    // Protect function you want to register raw :
+    di.set('math.add', di.protected(function (a, b) {
         return a + b;
-    });
+    }));
 
-    // This previous example is BAD, use instead :
-    di.set('math.add', function () {
-        return function (a, b) {
-            return a + b;
-        };
-    });
-    
-    // If you need it, i can implement di.protect() to allow to store functions
-    
     // You can use promise
     
     di.set('async', function () {
