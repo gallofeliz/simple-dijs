@@ -178,6 +178,38 @@ describe('Di', function() {
         });
     });
 
+    describe('#protect', function () {
+
+        it('Call without argument', function () {
+            try {
+                di.protect();
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'One argument required');
+            }            
+        });
+
+        it('Call with non-function argument', function () {
+            try {
+                di.protect('Please protect me');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Expected function func');
+            }
+        });
+
+        it('Call correct', function () {
+            di.set('math.add', di.protect(function (a, b) {
+                return a + b;
+            }));
+
+            var mathAdd = di.get('math.add');
+            assert.strictEqual(mathAdd(5, 7), 12);
+        });
+    });
+
     describe('#factory', function () {
 
         it('Call without argument', function () {
