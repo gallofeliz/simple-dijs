@@ -129,7 +129,7 @@ Di.prototype = {
     /**
         Create a factory function
         @see Di#set
-        @param {Function} The function to factory
+        @param func {Function} The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
         @example
