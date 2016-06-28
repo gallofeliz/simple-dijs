@@ -25,7 +25,14 @@ You can install from NPM or directly (manual build : `npm run build`)
 ```    
 
 ```javascript
+    // Simple instanciation
     var di = new Di();
+    // Instanciation with services
+    var di = new Di({
+        'server': function () {
+            return new Server(...);
+        }
+    });
     
     di.set('database', function () {
         return new Database();
