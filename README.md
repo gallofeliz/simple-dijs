@@ -83,6 +83,9 @@ You can install from NPM or directly (manual build : `npm run build`)
     di.get('async').done(function () {
         // ...
     });
+
+    // You can chain the methods calls
+    (new Di()).set(...).set(...);
 ```
 
 [![](https://avighier.piwikpro.com/piwik.php?idsite=7&rec=1)]()
