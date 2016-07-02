@@ -27,11 +27,10 @@ You can install from NPM or directly (manual build : `npm run build`)
 ```javascript
     // Simple instanciation
     var di = new Di();
-    // Instanciation with services
-    var di = new Di({
-        'server': function () {
-            return new Server(...);
-        }
+    // Also instanciation with services
+    new Di({
+        'database': function () { ... },
+        'userCollection': function (di) { ... }
     });
     
     di.set('database', function () {
@@ -42,18 +41,13 @@ You can install from NPM or directly (manual build : `npm run build`)
         return new UserCollection(di.get('database'));
     });
     
+    // Or multiple services
+    di.batchSet({ ..same than construct.. });
+
     // So, ...
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // The same UserCollection instance
-
-    // Also during construction and method batchSet
-    new Di({
-        'database': function () { ... },
-        'userCollection': function (di) { ... }
-    });
-
-    di.batchSet({ ..same than construct.. });
-    
+   
     // If you want to factory instead of return the same object :
     di.set('userCollection', di.factory(function (di) {
         return new UserCollection(di.get('database'));
