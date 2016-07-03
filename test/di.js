@@ -104,6 +104,48 @@ describe('Di', function() {
         assert.strictEqual(returned, di);
     });
 
+    describe('#remove', function () {
+        it('Call without argument', function () {
+            try {
+                di.remove();
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'One argument required');
+            }
+        });
+
+        it('Call with non-string id', function () {
+            try {
+                di.remove({'my': 'id'});
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Expected string id');
+            }
+        });
+
+        it('Call with unexisting id', function () {
+            try {
+                di.remove('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Identifier "myId" is not defined');
+            }
+        });
+
+        it('Correct call (existing id)', function () {
+            di.set('server', function () {
+                return {};
+            });
+
+            var returns = di.remove('server');
+            assert.strictEqual(returns, di);
+            assert(!di.has('server'));
+        });
+    });
+
     describe('#get', function () {
 
         it('Call without argument', function () {

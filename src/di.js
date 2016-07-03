@@ -175,12 +175,30 @@ Di.prototype = {
         return function () {
             return func;
         };
+    },
+    /**
+        Remove a value
+
+        @param id {string} The value id
+        @returns {Di} himself
+        @throws {Error} Missing or incorrect argument
+        @throws {Error} Missing value (not registered)
+        @example
+            di.remove('database')
+    */
+    remove: function (id) {
+        assert(arguments.length >= 1, 'One argument required');
+        assert(typeof id === 'string', 'Expected string id');
+        assert(this.has(id) === true, 'Identifier "%s" is not defined'.replace('%s', id));
+
+        delete this._definitions[id];
+
+        return this;
     }
     /*
     extend: function (id, func) {
     },
-    remove: function ($id) {
-    },
+    replace: function () {}
     */
 };
 
