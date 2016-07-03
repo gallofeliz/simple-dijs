@@ -20,6 +20,7 @@ var assert = function (condition, errorMessage) {
 var Di = function (values) {
     this._definitions = {};
     this._factory = [];
+    this._protect = [];
 
     if (values) {
         this.batchSet(values);
@@ -88,14 +89,19 @@ Di.prototype = {
         assert(this.has(id) === false, 'Identifier "%s" already defined'.replace('%s', id));
 
         var isFunction = typeof funcOrValue === 'function',
+            isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1;
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
-        this._definitions[id] = isFunction ?
+        this._definitions[id] = isFunction && !isProtected ?
                                 { func: isInFactory ? funcOrValue : this._single(funcOrValue) } :
                                 { value: funcOrValue };
 
         if (isInFactory) {
             this._factory.splice(this._factory.indexOf(funcOrValue), 1);
+        }
+
+        if (isProtected) {
+            this._protect.splice(this._protect.indexOf(funcOrValue), 1);   
         }
 
         return this;
@@ -161,7 +167,7 @@ Di.prototype = {
         Protect a function to store as raw
         @see Di#set
         @param func {Function} The function to factory
-        @returns {Function} The protected function
+        @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
         @example
             *di.set('math.add', di.protect(function (a, b) {
@@ -171,10 +177,9 @@ Di.prototype = {
     protect: function (func) {
         assert(arguments.length >= 1, 'One argument required');
         assert(typeof func === 'function', 'Expected function func');
+        this._protect.push(func);
 
-        return function () {
-            return func;
-        };
+        return func;
     },
     /**
         Remove a value
