@@ -1,9 +1,3 @@
-var assert = function (condition, errorMessage) {
-    if (!condition) {
-        throw new Error(errorMessage);
-    }
-};
-
 /**
     Create a new Container
 
@@ -42,8 +36,11 @@ Di.prototype = {
     */
     batchSet: function (values) {
         var that = this;
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof values === 'object' && values !== null, 'Expected argument values to be Object');
+
+        if (typeof values !== 'object' || values === null) {
+            throw new Error('Expected argument values type Object');
+        }
+
         Object.keys(values).forEach(function (id) {
             that.set(id, values[id]);
         });
@@ -84,9 +81,19 @@ Di.prototype = {
             *})
     */
     set: function (id, funcOrValue) {
-        assert(arguments.length >= 2, 'Two arguments required');
-        assert(typeof id === 'string', 'Expected string id');
-        assert(this.has(id) === false, 'Identifier "%s" already defined'.replace('%s', id));
+
+
+        if (typeof id !== 'string') {
+            throw new Error('Expected argument id type string');
+        }
+
+        if (arguments.length < 2) {
+            throw new Error('Expected argument funcOrValue');
+        }
+
+        if (this.has(id)) {
+            throw new Error('Identifier "%s" already defined'.replace('%s', id));
+        }
 
         var isFunction = typeof funcOrValue === 'function',
             isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1;
@@ -121,9 +128,14 @@ Di.prototype = {
             *})
     */
     get: function (id) {
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof id === 'string', 'Expected string id');
-        assert(this.has(id) === true, 'Identifier "%s" is not defined'.replace('%s', id));
+
+        if (typeof id !== 'string') {
+            throw new Error('Expected argument id type string');
+        }
+
+        if (!this.has(id)) {
+            throw new Error('Identifier "%s" is not defined'.replace('%s', id));
+        }
 
         var definition = this._definitions[id],
             hasValue = Object.keys(definition).indexOf('value') !== -1;
@@ -145,9 +157,15 @@ Di.prototype = {
             *}))
     */
     factory: function (func) {
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof func === 'function', 'Expected function func');
-        assert(this._protect.indexOf(func) === -1, 'Cannot factory a protected function');
+
+        if (typeof func !== 'function') {
+            throw new Error('Expected argument func type function');
+        }
+
+        if (this._protect.indexOf(func) !== -1) {
+            throw new Error('Cannot factory a protected function');
+        }
+
         this._factory.push(func);
 
         return func;
@@ -178,9 +196,15 @@ Di.prototype = {
             *}))
     */
     protect: function (func) {
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof func === 'function', 'Expected function func');
-        assert(this._factory.indexOf(func) === -1, 'Cannot protect a factory function');
+
+        if (typeof func !== 'function') {
+            throw new Error('Expected argument func type function');
+        }
+
+        if (this._factory.indexOf(func) !== -1) {
+            throw new Error('Cannot protect a factory function');
+        }
+
         this._protect.push(func);
 
         return func;
@@ -196,9 +220,14 @@ Di.prototype = {
             di.remove('database')
     */
     remove: function (id) {
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof id === 'string', 'Expected string id');
-        assert(this.has(id) === true, 'Identifier "%s" is not defined'.replace('%s', id));
+
+        if (typeof id !== 'string') {
+            throw new Error('Expected argument id type string');
+        }
+
+        if (!this.has(id)) {
+            throw new Error('Identifier "%s" is not defined'.replace('%s', id));
+        }
 
         delete this._definitions[id];
 
