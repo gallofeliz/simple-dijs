@@ -2,7 +2,7 @@
     Create a new Container
 
     @constructor
-    @param [values] {Object.<string, *>} Values to set on construction (eqiv batchSet {@link Di#batchSet})
+    @param {Object.<string, *>} [values] Values to set on construction (eqiv batchSet {@link Di#batchSet})
     @example
         var di = new Di()
     *@example
@@ -25,7 +25,7 @@ Di.prototype = {
     /**
         Multiple set values
 
-        @param values {Object.<string, *>} Values to set
+        @param {Object.<string, *>} values Values to set
         @throws {Error} If values is not provided or not Object
         @returns {Di} himself
         @example
@@ -50,18 +50,18 @@ Di.prototype = {
     /**
         Check that the container owns the provided id
 
-        @param id {string} Id to check
-        @returns {boolean}
+        @param {string} id Id to check
+        @returns {boolean} If id is owned by the container
         @example
             di.has('database') || di.set('database', ...)
     */
     has: function (id) {
-        return typeof this._definitions[id] === 'undefined' ? false : true;
+        return typeof this._definitions[id] !== 'undefined';
     },
     /**
         Set a value in the container
-        @param id {string} The id of value
-        @param funcOrValue {*} The value
+        @param {string} id The id of value
+        @param {*} funcOrValue The value
         @returns {Di} himself
         @throws {Error} if missing or incorrect arguments
         @throws {Error} if Id is already registered
@@ -82,7 +82,6 @@ Di.prototype = {
     */
     set: function (id, funcOrValue) {
 
-
         if (typeof id !== 'string') {
             throw new Error('Expected argument id type string');
         }
@@ -96,19 +95,19 @@ Di.prototype = {
         }
 
         var isFunction = typeof funcOrValue === 'function',
-            isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1;
+            isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1,
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
-        this._definitions[id] = isFunction && !isProtected ?
-                                { func: isInFactory ? funcOrValue : this._single(funcOrValue) } :
-                                { value: funcOrValue };
+        this._definitions[id] = isFunction && !isProtected
+                                ? { func: isInFactory ? funcOrValue : this._single(funcOrValue) }
+                                : { value: funcOrValue };
 
         if (isInFactory) {
             this._factory.splice(this._factory.indexOf(funcOrValue), 1);
         }
 
         if (isProtected) {
-            this._protect.splice(this._protect.indexOf(funcOrValue), 1);   
+            this._protect.splice(this._protect.indexOf(funcOrValue), 1);
         }
 
         return this;
@@ -116,7 +115,7 @@ Di.prototype = {
     /**
         Get a value
 
-        @param id {string} The value id
+        @param {string} id The value id
         @returns {*} The value
         @throws {Error} Missing or incorrect argument
         @throws {Error} Missing value (not registered)
@@ -140,14 +139,14 @@ Di.prototype = {
         var definition = this._definitions[id],
             hasValue = Object.keys(definition).indexOf('value') !== -1;
 
-        return hasValue ?
-            definition.value :
-            definition.func(this);
+        return hasValue
+            ? definition.value
+            : definition.func(this);
     },
     /**
         Create a factory function
         @see Di#set
-        @param func {Function} The function to factory
+        @param {Function} func The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
         @throws {Error} Protected function
@@ -186,7 +185,7 @@ Di.prototype = {
     /**
         Protect a function to store as raw
         @see Di#set
-        @param func {Function} The function to factory
+        @param {Function} func The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
         @throws {Error} Factory function
@@ -212,7 +211,7 @@ Di.prototype = {
     /**
         Remove a value
 
-        @param id {string} The value id
+        @param {string} id The value id
         @returns {Di} himself
         @throws {Error} Missing or incorrect argument
         @throws {Error} Missing value (not registered)
