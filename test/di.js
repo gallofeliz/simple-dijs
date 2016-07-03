@@ -242,6 +242,20 @@ describe('Di', function() {
             }
         });
 
+        it('Call on factory function', function () {
+            var factoryFunc = di.factory(function (di) {
+                return new Database();
+            });
+
+            try {
+                di.protect(factoryFunc); // Non-sense !
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Cannot protect a factory function');
+            }
+        });
+
         it('Call correct', function () {
             di.set('math.add', di.protect(function (a, b) {
                 return a + b;
@@ -286,6 +300,20 @@ describe('Di', function() {
             } catch (e) {
                 assert(e instanceof Error);
                 assert.strictEqual(e.message, 'Expected function func');
+            }
+        });
+
+        it('Call on protected function', function () {
+            var protectedFunc = di.protect(function (a, b) {
+                return a + b;
+            });
+
+            try {
+                di.factory(protectedFunc); // Non-sense !
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Cannot factory a protected function');
             }
         });
 
