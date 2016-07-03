@@ -38,6 +38,7 @@
     "bower": "^1.7.9",
     "browserify": "^13.0.1",
     "docdash": "^0.4.0",
+    "gulp": "^3.9.1",
     "istanbul": "^0.3.5",
     "jsdoc": "^3.4.0",
     "jshint": "^2.6.0",
