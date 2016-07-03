@@ -250,6 +250,21 @@ describe('Di', function() {
             var mathAdd = di.get('math.add');
             assert.strictEqual(mathAdd(5, 7), 12);
         });
+
+        it('Call (normal) queue with #set', function () {
+            var mathAdd = di.protect(function (a, b) {
+                    return a + b;
+                }),
+                mathMul = di.protect(function (a, b) {
+                    return a * b;
+                });
+
+            di.set('mathAdd', mathAdd)
+              .set('mathMul', mathMul);
+
+            assert.strictEqual(di.get('mathAdd')(5, 2), 7);
+            assert.strictEqual(di.get('mathMul')(5, 2), 10);
+        });
     });
 
     describe('#factory', function () {
