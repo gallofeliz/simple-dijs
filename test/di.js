@@ -1,7 +1,7 @@
-var assert = require("assert");
+var assert = require('assert');
 var Di = require('../dist/di');
 
-describe('Di', function() {
+describe('Di', function () {
 
     var di;
 
@@ -206,7 +206,7 @@ describe('Di', function() {
 
         it('Call on factory function', function () {
             var factoryFunc = di.factory(function (di) {
-                return new Database();
+                return {};
             });
 
             try {
@@ -319,7 +319,7 @@ describe('Di', function() {
                 }
             };
         })
-          .set('userService', function (injectedDi) {
+        .set('userService', function (injectedDi) {
             return {
                 getName: function (who) {
                     return injectedDi.get('userCollection').find(who).name;
