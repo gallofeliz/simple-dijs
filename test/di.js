@@ -24,15 +24,6 @@ describe('Di', function() {
     });
 
     describe('#batchSet', function () {
-        it('Call without required arguments', function () {
-            try {
-                di.batchSet();
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
-            }
-        });
 
         it('Call with non-object values', function () {
             try {
@@ -40,7 +31,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected argument values to be Object');
+                assert.strictEqual(e.message, 'Expected argument values type Object');
             }
         });
 
@@ -58,23 +49,23 @@ describe('Di', function() {
 
     describe('#set', function () {
 
-        it('Call without required arguments', function () {
-            try {
-                di.set('myId');
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Two arguments required');
-            }
-        });
-
         it('Call with non-string id', function () {
             try {
                 di.set({'my': 'id'}, 'something');
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected argument id type string');
+            }
+        });
+
+        it('Call without funcOrValue', function () {
+            try {
+                di.set('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Expected argument funcOrValue');
             }
         });
 
@@ -105,15 +96,6 @@ describe('Di', function() {
     });
 
     describe('#remove', function () {
-        it('Call without argument', function () {
-            try {
-                di.remove();
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
-            }
-        });
 
         it('Call with non-string id', function () {
             try {
@@ -121,7 +103,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected argument id type string');
             }
         });
 
@@ -148,23 +130,13 @@ describe('Di', function() {
 
     describe('#get', function () {
 
-        it('Call without argument', function () {
-            try {
-                di.get();
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
-            }
-        });
-
         it('Call with non-string id', function () {
             try {
                 di.get({'my': 'id'});
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected argument id type string');
             }
         });
 
@@ -222,23 +194,13 @@ describe('Di', function() {
 
     describe('#protect', function () {
 
-        it('Call without argument', function () {
-            try {
-                di.protect();
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
-            }            
-        });
-
         it('Call with non-function argument', function () {
             try {
                 di.protect('Please protect me');
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected function func');
+                assert.strictEqual(e.message, 'Expected argument func type function');
             }
         });
 
@@ -283,23 +245,13 @@ describe('Di', function() {
 
     describe('#factory', function () {
 
-        it('Call without argument', function () {
-            try {
-                di.factory();
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
-            }
-        });
-
         it('Call with non-function argument', function () {
             try {
                 di.factory('Please factorize me');
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected function func');
+                assert.strictEqual(e.message, 'Expected argument func type function');
             }
         });
 
