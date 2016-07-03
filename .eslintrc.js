@@ -22,12 +22,12 @@ module.exports = {
        "radix": "error",
        "camelcase": "error",
        "require-jsdoc": ["error", {
-                   "require": {
-                       "FunctionDeclaration": true,
-                       "MethodDefinition": true,
-                       "ClassDeclaration": true
-                   }
-               }],
-               "valid-jsdoc": "error"
+           "require": {
+               "FunctionDeclaration": true,
+               "MethodDefinition": true,
+               "ClassDeclaration": true
+           }
+       }],
+       "valid-jsdoc": "error"
     }
 };
