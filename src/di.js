@@ -138,6 +138,7 @@ Di.prototype = {
         @param func {Function} The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
+        @throws {Error} Protected function
         @example
             *di.set('token', di.factory(function () {
             *   return new Token();
@@ -146,6 +147,7 @@ Di.prototype = {
     factory: function (func) {
         assert(arguments.length >= 1, 'One argument required');
         assert(typeof func === 'function', 'Expected function func');
+        assert(this._protect.indexOf(func) === -1, 'Cannot factory a protected function');
         this._factory.push(func);
 
         return func;
@@ -169,6 +171,7 @@ Di.prototype = {
         @param func {Function} The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
+        @throws {Error} Factory function
         @example
             *di.set('math.add', di.protect(function (a, b) {
             *   return a + b;
@@ -177,6 +180,7 @@ Di.prototype = {
     protect: function (func) {
         assert(arguments.length >= 1, 'One argument required');
         assert(typeof func === 'function', 'Expected function func');
+        assert(this._factory.indexOf(func) === -1, 'Cannot protect a factory function');
         this._protect.push(func);
 
         return func;
