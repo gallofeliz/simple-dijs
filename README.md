@@ -1,5 +1,7 @@
 # simple-dijs
 
+[![Join the chat at https://gitter.im/avighier/simple-dijs](https://badges.gitter.im/avighier/simple-dijs.svg)](https://gitter.im/avighier/simple-dijs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Please visit our website for full documentation https://avighier.github.io/simple-dijs/
 
 ```javascript
