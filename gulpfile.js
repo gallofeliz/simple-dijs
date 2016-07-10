@@ -6,6 +6,8 @@ var mocha = require('gulp-mocha');
 var mkdirp = require('mkdirp');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
+var uglify = require('gulp-uglify');
+var rename = require("gulp-rename");
 
 gulp.task('lint', function () {
     return gulp.src(['src/*.js', '*.js', 'test/*.js'])
@@ -30,6 +32,13 @@ gulp.task('build-dist', function () {
      .pipe(source('di.js'))
      .pipe(gulp.dest('dist'));
 
+});
+
+gulp.task('build-minify', ['build-dist'], function () {
+    gulp.src('dist/di.js')
+        .pipe(rename('di.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('test', ['lint', 'clean'], function (cb) {
