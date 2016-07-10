@@ -84,7 +84,7 @@ gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
         miniFile = mainFile.replace(/\.js$/, '.min.js'),
         fs = require('fs'),
         path = require('path'),
-        dir = fs.mkdtempSync(process.env.TEMP + path.sep + 'tnp-'),
+        dir = fs.mkdtempSync(require('os').tmpdir() + path.sep + 'tnp-'),
         source = __dirname,
         finish = function (e) {
             del(dir).then(function () { cb(e); }, function () { cb(e); });
