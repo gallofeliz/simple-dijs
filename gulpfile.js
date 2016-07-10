@@ -3,6 +3,9 @@ var eslint = require('gulp-eslint');
 var del = require('del');
 var istanbul = require('gulp-istanbul');
 var mocha = require('gulp-mocha');
+var mkdirp = require('mkdirp');
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
 
 gulp.task('lint', function () {
     return gulp.src(['src/*.js', '*.js', 'test/*.js'])
@@ -15,6 +18,18 @@ gulp.task('clean', function () {
     return del([
         'coverage'
     ]);
+});
+
+gulp.task('build-dist', function () {
+    mkdirp.sync('dist');
+
+    return browserify(
+        ['src/di.js'],
+        { standalone: 'Di' }
+    ).bundle()
+     .pipe(source('di.js'))
+     .pipe(gulp.dest('dist'));
+
 });
 
 gulp.task('test', ['lint', 'clean'], function (cb) {
