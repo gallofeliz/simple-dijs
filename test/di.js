@@ -1,5 +1,5 @@
 var assert = require("assert");
-var Di = typeof window !== 'undefined' ? window.Di : require('../di');
+var Di = require('../dist/di');
 
 describe('Di', function() {
 
@@ -24,15 +24,6 @@ describe('Di', function() {
     });
 
     describe('#batchSet', function () {
-        it('Call without required arguments', function () {
-            try {
-                di.batchSet();
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
-            }
-        });
 
         it('Call with non-object values', function () {
             try {
@@ -40,7 +31,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected argument values to be Object');
+                assert.strictEqual(e.message, 'Expected argument values type Object');
             }
         });
 
@@ -58,23 +49,23 @@ describe('Di', function() {
 
     describe('#set', function () {
 
-        it('Call without required arguments', function () {
-            try {
-                di.set('myId');
-                assert.fail('Expected error');
-            } catch (e) {
-                assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Two arguments required');
-            }
-        });
-
         it('Call with non-string id', function () {
             try {
                 di.set({'my': 'id'}, 'something');
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected argument id type string');
+            }
+        });
+
+        it('Call without funcOrValue', function () {
+            try {
+                di.set('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Expected argument funcOrValue');
             }
         });
 
@@ -104,17 +95,40 @@ describe('Di', function() {
         assert.strictEqual(returned, di);
     });
 
-    describe('#get', function () {
+    describe('#remove', function () {
 
-        it('Call without argument', function () {
+        it('Call with non-string id', function () {
             try {
-                di.get();
+                di.remove({'my': 'id'});
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
+                assert.strictEqual(e.message, 'Expected argument id type string');
             }
         });
+
+        it('Call with unexisting id', function () {
+            try {
+                di.remove('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Identifier "myId" is not defined');
+            }
+        });
+
+        it('Correct call (existing id)', function () {
+            di.set('server', function () {
+                return {};
+            });
+
+            var returns = di.remove('server');
+            assert.strictEqual(returns, di);
+            assert(!di.has('server'));
+        });
+    });
+
+    describe('#get', function () {
 
         it('Call with non-string id', function () {
             try {
@@ -122,7 +136,7 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected string id');
+                assert.strictEqual(e.message, 'Expected argument id type string');
             }
         });
 
@@ -178,17 +192,58 @@ describe('Di', function() {
         });
     });
 
-    describe('#factory', function () {
+    describe('#protect', function () {
 
-        it('Call without argument', function () {
+        it('Call with non-function argument', function () {
             try {
-                di.factory();
+                di.protect('Please protect me');
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'One argument required');
+                assert.strictEqual(e.message, 'Expected argument func type function');
             }
         });
+
+        it('Call on factory function', function () {
+            var factoryFunc = di.factory(function (di) {
+                return new Database();
+            });
+
+            try {
+                di.protect(factoryFunc); // Non-sense !
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Cannot protect a factory function');
+            }
+        });
+
+        it('Call correct', function () {
+            di.set('math.add', di.protect(function (a, b) {
+                return a + b;
+            }));
+
+            var mathAdd = di.get('math.add');
+            assert.strictEqual(mathAdd(5, 7), 12);
+        });
+
+        it('Call (normal) queue with #set', function () {
+            var mathAdd = di.protect(function (a, b) {
+                    return a + b;
+                }),
+                mathMul = di.protect(function (a, b) {
+                    return a * b;
+                });
+
+            di.set('mathAdd', mathAdd)
+              .set('mathMul', mathMul);
+
+            assert.strictEqual(di.get('mathAdd')(5, 2), 7);
+            assert.strictEqual(di.get('mathMul')(5, 2), 10);
+        });
+    });
+
+    describe('#factory', function () {
 
         it('Call with non-function argument', function () {
             try {
@@ -196,12 +251,27 @@ describe('Di', function() {
                 assert.fail('Expected error');
             } catch (e) {
                 assert(e instanceof Error);
-                assert.strictEqual(e.message, 'Expected function func');
+                assert.strictEqual(e.message, 'Expected argument func type function');
+            }
+        });
+
+        it('Call on protected function', function () {
+            var protectedFunc = di.protect(function (a, b) {
+                return a + b;
+            });
+
+            try {
+                di.factory(protectedFunc); // Non-sense !
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Cannot factory a protected function');
             }
         });
 
         it('Call (normal) with #set', function () {
-            di.set('myId', di.factory(function () {
+            di.set('myId', di.factory(function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
                 return ['something'];
             }));
 
@@ -213,10 +283,12 @@ describe('Di', function() {
         });
 
         it('Call (normal) queue with #set', function () {
-            var factoryMyId = di.factory(function () {
+            var factoryMyId = di.factory(function (injectedDi) {
+                    assert.strictEqual(injectedDi, di);
                     return ['something'];
                 }),
-                factoryMyId2 = di.factory(function () {
+                factoryMyId2 = di.factory(function (injectedDi) {
+                    assert.strictEqual(injectedDi, di);
                     return ['something-else'];
                 });
 

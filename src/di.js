@@ -1,10 +1,3 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Di = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var assert = function (condition, errorMessage) {
-    if (!condition) {
-        throw new Error(errorMessage);
-    }
-};
-
 /**
     Create a new Container
 
@@ -21,6 +14,7 @@ var assert = function (condition, errorMessage) {
 var Di = function (values) {
     this._definitions = {};
     this._factory = [];
+    this._protect = [];
 
     if (values) {
         this.batchSet(values);
@@ -42,8 +36,11 @@ Di.prototype = {
     */
     batchSet: function (values) {
         var that = this;
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof values === 'object' && values !== null, 'Expected argument values to be Object');
+
+        if (typeof values !== 'object' || values === null) {
+            throw new Error('Expected argument values type Object');
+        }
+
         Object.keys(values).forEach(function (id) {
             that.set(id, values[id]);
         });
@@ -84,19 +81,34 @@ Di.prototype = {
             *})
     */
     set: function (id, funcOrValue) {
-        assert(arguments.length >= 2, 'Two arguments required');
-        assert(typeof id === 'string', 'Expected string id');
-        assert(this.has(id) === false, 'Identifier "%s" already defined'.replace('%s', id));
+
+
+        if (typeof id !== 'string') {
+            throw new Error('Expected argument id type string');
+        }
+
+        if (arguments.length < 2) {
+            throw new Error('Expected argument funcOrValue');
+        }
+
+        if (this.has(id)) {
+            throw new Error('Identifier "%s" already defined'.replace('%s', id));
+        }
 
         var isFunction = typeof funcOrValue === 'function',
+            isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1;
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
-        this._definitions[id] = isFunction ?
+        this._definitions[id] = isFunction && !isProtected ?
                                 { func: isInFactory ? funcOrValue : this._single(funcOrValue) } :
                                 { value: funcOrValue };
 
         if (isInFactory) {
             this._factory.splice(this._factory.indexOf(funcOrValue), 1);
+        }
+
+        if (isProtected) {
+            this._protect.splice(this._protect.indexOf(funcOrValue), 1);   
         }
 
         return this;
@@ -116,9 +128,14 @@ Di.prototype = {
             *})
     */
     get: function (id) {
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof id === 'string', 'Expected string id');
-        assert(this.has(id) === true, 'Identifier "%s" is not defined'.replace('%s', id));
+
+        if (typeof id !== 'string') {
+            throw new Error('Expected argument id type string');
+        }
+
+        if (!this.has(id)) {
+            throw new Error('Identifier "%s" is not defined'.replace('%s', id));
+        }
 
         var definition = this._definitions[id],
             hasValue = Object.keys(definition).indexOf('value') !== -1;
@@ -130,17 +147,25 @@ Di.prototype = {
     /**
         Create a factory function
         @see Di#set
-        @param {Function} The function to factory
+        @param func {Function} The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
+        @throws {Error} Protected function
         @example
             *di.set('token', di.factory(function () {
             *   return new Token();
             *}))
     */
     factory: function (func) {
-        assert(arguments.length >= 1, 'One argument required');
-        assert(typeof func === 'function', 'Expected function func');
+
+        if (typeof func !== 'function') {
+            throw new Error('Expected argument func type function');
+        }
+
+        if (this._protect.indexOf(func) !== -1) {
+            throw new Error('Cannot factory a protected function');
+        }
+
         this._factory.push(func);
 
         return func;
@@ -157,21 +182,64 @@ Di.prototype = {
             this.value = func(di);
             return this.value;
         };
+    },
+    /**
+        Protect a function to store as raw
+        @see Di#set
+        @param func {Function} The function to factory
+        @returns {Function} The same function
+        @throws {Error} Missing or incorrect argument
+        @throws {Error} Factory function
+        @example
+            *di.set('math.add', di.protect(function (a, b) {
+            *   return a + b;
+            *}))
+    */
+    protect: function (func) {
+
+        if (typeof func !== 'function') {
+            throw new Error('Expected argument func type function');
+        }
+
+        if (this._factory.indexOf(func) !== -1) {
+            throw new Error('Cannot protect a factory function');
+        }
+
+        this._protect.push(func);
+
+        return func;
+    },
+    /**
+        Remove a value
+
+        @param id {string} The value id
+        @returns {Di} himself
+        @throws {Error} Missing or incorrect argument
+        @throws {Error} Missing value (not registered)
+        @example
+            di.remove('database')
+    */
+    remove: function (id) {
+
+        if (typeof id !== 'string') {
+            throw new Error('Expected argument id type string');
+        }
+
+        if (!this.has(id)) {
+            throw new Error('Identifier "%s" is not defined'.replace('%s', id));
+        }
+
+        delete this._definitions[id];
+
+        return this;
     }
     /*
-    protect: function (func) {
-    },
-    raw: function (id) {
-    },
     extend: function (id, func) {
     },
-    remove: function ($id) {
-    },
+    replace: function () {}
     */
 };
 
 Di.prototype.register = Di.prototype.set;
 
 module.exports = Di;
-},{}]},{},[1])(1)
-});
