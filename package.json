@@ -15,10 +15,10 @@
     "url": "git://github.com/avighier/simple-dijs.git"
   },
   "scripts": {
-    "test": "bash -c 'node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha' && npm run browser-test",
+    "test": "node_modules/.bin/gulp test",
     "browser-test": "bash -c 'node_modules/.bin/browserify test/di.js -o test/browser/di.js' && bash -c 'node_modules/.bin/mocha-phantomjs test/browser/browser.html' && rm test/browser/di.js",
     "doc": "bash -c 'node_modules/.bin/jsdoc src/di.js -t node_modules/docdash/ -d doc'",
-    "build-dist": "bash -c 'mkdir -p dist' && bash -c 'node_modules/.bin/browserify src/di.js --standalone Di -o dist/di.js'",
+    "build-dist": "node_modules/.bin/gulp build-dist",
     "jshint": "node_modules/.bin/gulp lint",
     "build": "npm run build-dist && npm run jshint && npm run test",
     "prepublish": "npm run build"
@@ -48,7 +48,9 @@
     "gulp-mocha": "^2.2.0",
     "istanbul": "^0.3.5",
     "jsdoc": "^3.4.0",
+    "mkdirp": "^0.5.1",
     "mocha": "^2.1.0",
-    "mocha-phantomjs": "^4.1.0"
+    "mocha-phantomjs": "^4.1.0",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
