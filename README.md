@@ -82,4 +82,4 @@ You can install from NPM or directly (manual build : `npm run build`)
     (new Di()).set(...).set(...);
 ```
 
-[![](https://avighier.piwikpro.com/piwik.php?idsite=7&rec=1)]()
+[![](https://piwik.avighier.fr/piwik.php?idsite=2&rec=1)]()
