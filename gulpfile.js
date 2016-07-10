@@ -7,7 +7,7 @@ var mkdirp = require('mkdirp');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var uglify = require('gulp-uglify');
-var rename = require("gulp-rename");
+var rename = require('gulp-rename');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
 gulp.task('lint', function () {
@@ -66,12 +66,12 @@ gulp.task('browser-test', function (cb) {
      .pipe(source('di.js'))
      .pipe(gulp.dest('test/browser'))
      .on('end', function () {
-        return gulp.src('test/browser/browser.html')
-                   .pipe(mochaPhantomJS())
-                   .on('error', function (e) {
+         return gulp.src('test/browser/browser.html')
+                    .pipe(mochaPhantomJS())
+                    .on('error', function (e) {
                         del(['test/browser/di.js']); cb(e);
                     })
-                   .on('finish', function () {
+                    .on('finish', function () {
                         del(['test/browser/di.js']); cb();
                     });
      });
