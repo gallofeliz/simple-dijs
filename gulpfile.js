@@ -10,6 +10,9 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
+console.log(process.env);
+console.log(JSON.stringify(process.env));
+
 gulp.task('default', ['build']);
 gulp.task('build', ['checks', 'build-dist', 'build-minify']);
 gulp.task('checks', ['lint', 'test', 'browser-test', 'test-npm-package']);
