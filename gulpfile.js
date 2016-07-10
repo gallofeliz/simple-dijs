@@ -8,6 +8,7 @@ var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var uglify = require('gulp-uglify');
 var rename = require("gulp-rename");
+var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
 gulp.task('lint', function () {
     return gulp.src(['src/*.js', '*.js', 'test/*.js'])
@@ -55,6 +56,26 @@ gulp.task('test', ['lint', 'clean'], function (cb) {
                             .pipe(istanbul.enforceThresholds({ thresholds: { global: 70 } }))
                             .on('error', cb);
                 });
+});
+
+gulp.task('browser-test', function (cb) {
+
+    browserify(
+        ['test/di.js']
+    ).bundle()
+     .pipe(source('di.js'))
+     .pipe(gulp.dest('test/browser'))
+     .on('end', function () {
+        return gulp.src('test/browser/browser.html')
+                   .pipe(mochaPhantomJS())
+                   .on('error', function (e) {
+                        del(['test/browser/di.js']); cb(e);
+                    })
+                   .on('finish', function () {
+                        del(['test/browser/di.js']); cb();
+                    });
+     });
+
 });
 
 gulp.task('test-npm-package', function (cb) {
