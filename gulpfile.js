@@ -1,12 +1,36 @@
 var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var del = require('del');
+var istanbul = require('gulp-istanbul');
+var mocha = require('gulp-mocha');
 
 gulp.task('lint', function () {
     return gulp.src(['src/*.js', '*.js', 'test/*.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
+});
+
+gulp.task('clean', function () {
+    return del([
+        'coverage'
+    ]);
+});
+
+gulp.task('test', ['lint', 'clean'], function (cb) {
+    return gulp.src(['dist/*.js'])
+                .pipe(istanbul({includeUntested: true}))
+                .pipe(istanbul.hookRequire())
+                .on('end', function () {
+                    return gulp.src(['test/*.js'])
+                            .pipe(mocha())
+                            .pipe(istanbul.writeReports({
+                                dir: 'coverage',
+                                reportOpts: { dir: 'coverage' }
+                            }))
+                            .pipe(istanbul.enforceThresholds({ thresholds: { global: 70 } }))
+                            .on('error', cb);
+                });
 });
 
 gulp.task('test-npm-package', function (cb) {
