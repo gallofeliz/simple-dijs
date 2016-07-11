@@ -82,7 +82,7 @@ gulp.task('browser-test', ['build-minify'], function (cb) {
 
 gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
 
-    npmTestInstall(__dirname, true).then(function (install) {
+    npmTestInstall('simple-dijs', __dirname, true).then(function (install) {
         var mainFile = require('./package.json').main,
             miniFile = mainFile.replace(/\.js$/, '.min.js');
 
