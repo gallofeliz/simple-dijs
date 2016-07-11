@@ -9,6 +9,9 @@ var source = require('vinyl-source-stream');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
+var fs = require('fs');
+var path = require('path');
+var npmTestInstall = require('npm-test-install');
 
 gulp.task('default', ['build']);
 gulp.task('build', ['checks', 'build-dist', 'build-minify']);
@@ -79,27 +82,13 @@ gulp.task('browser-test', ['build-minify'], function (cb) {
 
 gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
 
-    var exec = require('child_process').exec,
-        mainFile = require('./package.json').main,
-        miniFile = mainFile.replace(/\.js$/, '.min.js'),
-        fs = require('fs'),
-        path = require('path'),
-        dir = fs.mkdtempSync(require('os').tmpdir() + path.sep + 'tnp-'),
-        source = __dirname,
-        finish = function (e) {
-            del(dir).then(function () { cb(e); }, function () { cb(e); });
-        };
-
-    exec('npm install --ignore-scripts ' + source, {cwd: dir}, function (error, stdout, stderr) {
-
-        if (error) {
-            finish(error);
-            return;
-        }
+    npmTestInstall(__dirname, true).then(function (install) {
+        var mainFile = require('./package.json').main,
+            miniFile = mainFile.replace(/\.js$/, '.min.js');
 
         var missingFiles = [ mainFile, miniFile ].filter(function (filename) {
             try {
-                fs.accessSync(path.join(dir, 'node_modules', 'simple-dijs', filename));
+                fs.accessSync(path.join(install.getPackageDir(), filename));
                 return false;
             } catch (e) {
                 return true;
@@ -107,11 +96,20 @@ gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
         });
 
         if (missingFiles.length > 0) {
-            finish('Missing files ' + missingFiles.join(', '));
+            install.free().then(function () {
+                cb('Missing files ' + missingFiles.join(', '));
+            }, function (e) {
+                console.warn(e);
+                cb('Missing files ' + missingFiles.join(', '));
+            });
             return;
         }
 
         console.log('No missing files');
-        finish();
-    });
+        install.free().then(cb, function (e) {
+            console.warn(e);
+            cb();
+        });
+    }, cb);
+
 });
