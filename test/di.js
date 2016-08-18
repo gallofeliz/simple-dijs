@@ -86,6 +86,46 @@ describe('Di', function () {
             assert.strictEqual(returned, di);
         });
 
+        it('Call (normal) sync function', function (cb) {
+            var returned = di.set('myId', function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
+                return 'something';
+            });
+
+            assert.strictEqual(di.get('myId'), 'something');
+            assert.strictEqual(returned, di);
+        });
+
+        it('Call (normal) async callback resolving function', function (cb) {
+            var returned = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                callback(null, 'something');
+            });
+
+            assert.strictEqual(returned, di);
+            di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, 'something');
+                cb();
+            });
+        });
+
+        it('Call (normal) async callback rejecting function', function (cb) {
+            var error = new Error('Error connection database');
+
+            var returned = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                callback(new Error('Error connection database'));
+            });
+
+            assert.strictEqual(returned, di);
+            di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, error);
+                cb();
+            });
+        });
+
     });
 
     it('#register alias of #set', function () {
