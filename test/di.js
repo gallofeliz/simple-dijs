@@ -234,7 +234,7 @@ describe('Di', function () {
                 di.get('myId');
                 assert.fail('Expected error');
             } catch (e) {
-                assert.equal(e.message, 'Expected callback with callback registered value');
+                assert.equal(e.message, 'Expected callback function with callback registered value');
             }
         });
 
@@ -249,7 +249,7 @@ describe('Di', function () {
                 di.get('myId', null);
                 assert.fail('Expected error');
             } catch (e) {
-                assert.equal(e.message, 'Invalid argument callback : expected function');
+                assert.equal(e.message, 'Expected callback function with callback registered value');
             }
         });
 
