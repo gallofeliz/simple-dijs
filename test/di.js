@@ -516,24 +516,59 @@ describe('Di', function () {
 
     });
 
-    it('Integration test', function () {
+    it('Integration test', function (cb) {
 
-        di.set('userCollection', function (injectedDi) {
-            return {
-                find: function (id) {
-                    return { name: 'Paul' };
-                }
-            };
+        var dbConnect = function (url, callback) {
+            process.nextTick(function () {
+                callback(null, { connected: true });
+            });
+        };
+
+        di.set('database-url', 'mysql://127.0.0.1')
+        .set('database', function (injectedDi, callback) {
+            dbConnect(injectedDi.get('database-url'), callback);
+        })
+        .set('userCollection', function (injectedDi, callback) {
+            injectedDi.get('database', function () {
+                callback(null, {
+                    find: function (id) {
+                        return { name: 'Paul' };
+                    }
+                });
+            });
         })
         .set('userService', function (injectedDi) {
             return {
                 getName: function (who) {
-                    return injectedDi.get('userCollection').find(who).name;
+                    return new Promise(function (resolve) {
+                        injectedDi.get('userCollection', function (e, userCollection) {
+                            resolve(userCollection.find(who).name);
+                        });
+                    });
                 }
             };
         });
 
-        assert.strictEqual(di.get('userService').getName(1), 'Paul');
+        var countCbWhenOk = 0,
+            cbOnFinish = function () {
+                if (++countCbWhenOk === 2) {
+                    cb();
+                }
+            };
+
+        if (typeof Promise === 'function') {
+            di.get('userService').getName(1).then(function (name) {
+                assert.strictEqual(name, 'Paul');
+                cbOnFinish();
+            });
+        } else {
+            cbOnFinish();
+        }
+
+        di.get('userCollection', function (e, userCollection) {
+            assert.strictEqual(userCollection.find(1).name, 'Paul');
+            cbOnFinish();
+        });
     });
 
 });
