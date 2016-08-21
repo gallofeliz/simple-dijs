@@ -490,6 +490,55 @@ describe('Di', function () {
             assert.notEqual(firstCall, secondCall);
         });
 
+        it('Call (normal) with async callback #set', function (cb) {
+            di.set('myId', di.factory(function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                assert(callback instanceof Function);
+                process.nextTick(function () {
+                    callback(null, ['something']);
+                });
+            }));
+
+            var callbackValues = [],
+                countCbWhenOk = 0;
+
+            var cbWhenOk = function () {
+                if (++countCbWhenOk === 3) {
+                    assert.equal(callbackValues.length, 2);
+                    assert.notEqual(callbackValues[0], callbackValues[1]);
+                    cb();
+                }
+            };
+
+            var firstCall = di.get('myId', function (e, value) {
+                assert.strictEqual(e, null);
+                assert.deepEqual(value, ['something']);
+                callbackValues.push(value);
+                cbWhenOk();
+            });
+
+            var secondCall = di.get('myId', function (e, value) {
+                assert.strictEqual(e, null);
+                assert.deepEqual(value, ['something']);
+                callbackValues.push(value);
+                cbWhenOk();
+            });
+
+            assert(firstCall instanceof Promise);
+            assert(secondCall instanceof Promise);
+            assert.notEqual(firstCall, secondCall);
+
+            firstCall.then(function (value1) {
+                secondCall.then(function (value2) {
+                    assert.deepEqual(value1, ['something']);
+                    assert.deepEqual(value2, ['something']);
+                    assert.notEqual(value1, value2);
+                    cbWhenOk();
+                });
+            });
+
+        });
+
         it('Call (normal) queue with #set', function () {
             var factoryMyId = di.factory(function (injectedDi) {
                     assert.strictEqual(injectedDi, di);
