@@ -137,7 +137,7 @@ Di.prototype = {
         }
 
         this._definitions[id] = isFunction && !isProtected
-                                ? { func: isInFactory ? funcOrValue : this._single(funcOrValue) }
+                                ? { func: funcOrValue, isFactory: isInFactory }
                                 : { value: funcOrValue };
 
         if (isInFactory) {
@@ -198,7 +198,12 @@ Di.prototype = {
         var definition = this._definitions[id],
             hasValue = Object.keys(definition).indexOf('value') !== -1,
             hasFunc = Object.keys(definition).indexOf('func') !== -1,
-            value = hasValue ? definition.value : definition.func(this);
+            isFactory = hasFunc && definition.isFactory,
+            value = hasValue && !isFactory ? definition.value : definition.func(this);
+
+        if (hasFunc && !isFactory && !hasValue) {
+            definition.value = value;
+        }
 
         if (callback) {
             if (!hasFunc || !(value instanceof Promise)) {
@@ -245,12 +250,6 @@ Di.prototype = {
     */
     keys: function () {
         return Object.keys(this._definitions);
-    },
-    _single: function (func) {
-        return function (di) {
-            this.value = func(di);
-            return this.value;
-        };
     },
     /**
         Protect a function to store as raw
