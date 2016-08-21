@@ -280,7 +280,12 @@ describe('Di', function () {
             var call = di.get('myId', function (err, value) {
                 assert.strictEqual(err, null);
                 assert.strictEqual(value, callbackValue);
-                cbOnFinish();
+
+                di.get('myId', function (err, value) {
+                    assert.strictEqual(err, null);
+                    assert.strictEqual(value, callbackValue);
+                    cbOnFinish();
+                });
             });
 
             di.get('myId', function (err, value) {
