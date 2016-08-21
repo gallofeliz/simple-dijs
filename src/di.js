@@ -166,12 +166,28 @@ Di.prototype = {
             throw new Error('Identifier "%s" is not defined'.replace('%s', id));
         }
 
-        var definition = this._definitions[id],
-            hasValue = Object.keys(definition).indexOf('value') !== -1;
+        var callback = arguments.length > 1 ? arguments[1] : undefined;
 
-        return hasValue
-            ? definition.value
-            : definition.func(this);
+        if (callback !== undefined && typeof callback !== 'function') {
+            throw new Error('Invalid argument callback : expected optional function');
+        }
+
+        var definition = this._definitions[id],
+            hasValue = Object.keys(definition).indexOf('value') !== -1,
+            value = hasValue ? definition.value : definition.func(this);
+
+        if (callback) {
+            if (hasValue || !(value instanceof Promise)) {
+                throw new Error('Unexpected callback with non-async registered value');
+            }
+            value.then(function (value) {
+                callback(null, value);
+            }, function (err) {
+                callback(err);
+            });
+        }
+
+        return value;
     },
     /**
         Create a factory function
