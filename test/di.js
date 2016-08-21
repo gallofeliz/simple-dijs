@@ -230,13 +230,54 @@ describe('Di', function () {
             assert(returnDi, di);
         });
 
-        it.skip('Call with existing id having sync function, with callback ?');
+        it('Call with existing id having sync function, with callback', function () {
+            var returnDi = di.set('myId', function (di) {
+                return 'something';
+            });
+
+            assert(returnDi, di);
+
+            try {
+                di.get('myId', function () {});
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Unexpected callback with non-async registered value');
+            }
+        });
+
+        it('Call with existing id with invalid callback', function () {
+            var returnDi = di.set('myId', function (di, callback) {
+                callback(null, 'something');
+            });
+
+            assert(returnDi, di);
+
+            try {
+                di.get('myId', null);
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Invalid argument callback : expected optional function');
+            }
+        });
+
+        it('Call with existing id with callback on Promise registered', function () {
+            var returnDi = di.set('myId', Promise.resolve('something'));
+            assert(returnDi, di);
+
+            try {
+                di.get('myId', function () {});
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Unexpected callback with non-async registered value');
+            }
+
+        });
 
         it('Call with existing id having async native Promise resolving function', function (cb) {
             var promiseValue = ['something'];
 
             var promise = new Promise(function (resolve, reject) {
-                process.nextTrick(function () {
+                process.nextTick(function () {
                     resolve(promiseValue);
                 });
             });
@@ -261,7 +302,7 @@ describe('Di', function () {
             var error = new Error('Unable to connect to database');
 
             var promise = new Promise(function (resolve, reject) {
-                process.nextTrick(function () {
+                process.nextTick(function () {
                     reject(error);
                 });
             });
@@ -290,7 +331,7 @@ describe('Di', function () {
                 assert.strictEqual(injectedDi, di);
                 assert(callback instanceof Function);
                 assert.equal(++calledCount, 1);
-                process.nextTrick(function () {
+                process.nextTick(function () {
                     callback(null, callbackValue);
                 });
             });
@@ -300,7 +341,7 @@ describe('Di', function () {
             var controlsCount = 0,
                 cbOnFinish = function () {
                     if (++controlsCount === 3) {
-                        process.nextTrick(function () {
+                        process.nextTick(function () {
                             cb();
                         });
                     }
@@ -337,7 +378,7 @@ describe('Di', function () {
                 assert.strictEqual(injectedDi, di);
                 assert(callback instanceof Function);
                 assert.equal(++calledCount, 1);
-                process.nextTrick(function () {
+                process.nextTick(function () {
                     callback(callbackError);
                 });
             });
@@ -347,7 +388,7 @@ describe('Di', function () {
             var controlsCount = 0,
                 cbOnFinish = function () {
                     if (++controlsCount === 3) {
-                        process.nextTrick(function () {
+                        process.nextTick(function () {
                             cb();
                         });
                     }
