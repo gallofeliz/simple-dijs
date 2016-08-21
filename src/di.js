@@ -22,21 +22,19 @@ var Di = function (values) {
 };
 
 /**
-    Get a value asynchronously (registered with supported native Promise and callbacks)
+    Get a value asynchronously with callback (registered with callback)
     @method get
     @memberof Di
     @instance
     @variation 2
-    @param {string}    id The value id
-    @param {function}  [callback] The callback
-    @returns {Promise} The promise, alternative to callback
+    @param {string}      id The value id
+    @param {function}    [callback] The callback
+    @returns {undefined}
     @throws {Error} Missing or incorrect argument
     @throws {Error} Missing value (not registered)
+    @throws {Error} Unexpected callback for no-callback registered value
+    @throws {Error} Invalid callback
     @example
-        *di.get('database').then(function (database) {
-        *   database.find(userId);
-        *})
-    *@example
         *di.get('database', function (err, database) {
         *    if (err) {
         *        // ...
@@ -82,11 +80,11 @@ Di.prototype = {
         return typeof this._definitions[id] !== 'undefined';
     },
     /**
-        Set a value in the container. The registered value is default a synchronous value.
+        Set a value in the container. The registered value is by default the returned value.
 
         In case you use a function to factory your value :
             - you can use the first injected argument that is the current Di instance.
-            - you can registering asynchronously your value by returning a native Promise or declaring and
+            - you can register your value (for example for asynchronous) by declaring and
         calling the second possible argument "callback", as a normal node callback.
 
         @summary Set a value in the container, synchronously or asynchronously
@@ -163,6 +161,7 @@ Di.prototype = {
         @returns {*} The value
         @throws {Error} Missing or incorrect argument
         @throws {Error} Missing value (not registered)
+        @throws {Error} Missing callback for callback-registered value
         @example
             di.get('database').find(userId)
     */
@@ -176,12 +175,6 @@ Di.prototype = {
             throw new Error('Identifier "%s" is not defined'.replace('%s', id));
         }
 
-        var callback = arguments.length > 1 ? arguments[1] : undefined;
-
-        if (callback !== undefined && typeof callback !== 'function') {
-            throw new Error('Invalid argument callback : expected function');
-        }
-
         var definition = this._definitions[id],
             isFuncDefinition = Object.keys(definition).indexOf('func') !== -1;
 
@@ -189,10 +182,13 @@ Di.prototype = {
             case !isFuncDefinition:
                 return definition.value;
             case definition.hasCallbackArg:
-                this._getCbFn(definition, callback);
+                if (arguments.length < 2 || typeof arguments[1] !== 'function') {
+                    throw new Error('Expected callback function with callback registered value');
+                }
+                this._getCbFn(definition, arguments[1]);
                 return undefined;
             default:
-                if (callback) {
+                if (arguments.length > 1) {
                     throw new Error('Unexpected callback with no-callback registered value');
                 }
                 return this._getFn(definition);
@@ -211,10 +207,6 @@ Di.prototype = {
     },
     _getCbFn: function (definition, callback) {
         var hasValue = Object.keys(definition).indexOf('value') !== -1;
-
-        if (!callback) {
-            throw new Error('Expected callback with callback registered value');
-        }
 
         if (hasValue && !definition.isFactory) {
             callback(null, definition.value);
