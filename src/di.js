@@ -132,6 +132,10 @@ Di.prototype = {
             isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1,
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
+        if (isFunction && !isProtected) {
+            funcOrValue = this._fnCbToPromise(funcOrValue);
+        }
+
         this._definitions[id] = isFunction && !isProtected
                                 ? { func: isInFactory ? funcOrValue : this._single(funcOrValue) }
                                 : { value: funcOrValue };
@@ -145,6 +149,25 @@ Di.prototype = {
         }
 
         return this;
+    },
+    _fnCbToPromise: function (func) {
+        var args = func.toString().match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1].replace(/ /g, '').split(',');
+
+        if (args.length < 2) {
+            return func;
+        }
+
+        return function (di) {
+            return new Promise(function (resolve, reject) {
+                func(di, function (err, value) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(value);
+                });
+            });
+        };
     },
     /**
         Get a value synchronously
@@ -174,10 +197,11 @@ Di.prototype = {
 
         var definition = this._definitions[id],
             hasValue = Object.keys(definition).indexOf('value') !== -1,
+            hasFunc = Object.keys(definition).indexOf('func') !== -1,
             value = hasValue ? definition.value : definition.func(this);
 
         if (callback) {
-            if (hasValue || !(value instanceof Promise)) {
+            if (!hasFunc || !(value instanceof Promise)) {
                 throw new Error('Unexpected callback with non-async registered value');
             }
             value.then(function (value) {

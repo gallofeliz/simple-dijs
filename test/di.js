@@ -137,7 +137,7 @@ describe('Di', function () {
 
             var returned = di.set('myId', function (injectedDi, callback) {
                 assert.strictEqual(injectedDi, di);
-                callback(new Error('Error connection database'));
+                callback(error);
             });
 
             assert.strictEqual(returned, di);
