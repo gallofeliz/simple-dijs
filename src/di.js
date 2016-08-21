@@ -21,6 +21,29 @@ var Di = function (values) {
     }
 };
 
+/**
+    Get a value asynchronously (registered with supported native Promise and callbacks)
+    @method get
+    @memberof Di
+    @instance
+    @variation 2
+    @param {string}    id The value id
+    @param {function}  [callback] The callback
+    @returns {Promise} The promise, alternative to callback
+    @throws {Error} Missing or incorrect argument
+    @throws {Error} Missing value (not registered)
+    @example
+        *di.get('database').then(function (database) {
+        *   database.find(userId);
+        *})
+    *@example
+        *di.get('database', function (err, database) {
+        *    if (err) {
+        *        // ...
+        *    }
+        *    database.find(userId);
+        *})
+*/
 Di.prototype = {
     /**
         Multiple set values
@@ -113,7 +136,7 @@ Di.prototype = {
         return this;
     },
     /**
-        Get a value
+        Get a value synchronously
 
         @param {string} id The value id
         @returns {*} The value
@@ -121,10 +144,6 @@ Di.prototype = {
         @throws {Error} Missing value (not registered)
         @example
             di.get('database').find(userId)
-        *@example
-            *di.get('database').done(function (database) {
-            *   database.find(userId);
-            *})
     */
     get: function (id) {
 
