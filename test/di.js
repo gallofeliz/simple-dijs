@@ -96,28 +96,6 @@ describe('Di', function () {
             assert.strictEqual(returned, di);
         });
 
-        // No special support : Promise is a normal returned value
-        it('Call (normal) async promise function', function (cb) {
-            var returned = di.set('myId', function (injectedDi) {
-                assert.strictEqual(injectedDi, di);
-                return Promise.resolve('something');
-            });
-
-            assert.strictEqual(returned, di);
-            var myId = di.get('myId');
-            assert(myId instanceof Promise);
-
-            di.get('myId').then(function (value) {
-                assert.equal(value, 'something');
-                cb();
-            });
-        });
-
-        it.skip('Call (normal) sync without returned value ?');
-        it.skip('Call (normal) async callback without called callback ?');
-        it.skip('Call (normal) async callback with returned Promise ?');
-        it.skip('Call (normal) async callback with returned value ?');
-
         it('Call (normal) async callback resolving function', function (cb) {
             var returned = di.set('myId', function (injectedDi, callback) {
                 assert.strictEqual(injectedDi, di);
@@ -241,7 +219,22 @@ describe('Di', function () {
                 di.get('myId', function () {});
                 assert.fail('Expected error');
             } catch (e) {
-                assert.equal(e.message, 'Unexpected callback with non-async registered value');
+                assert.equal(e.message, 'Unexpected callback with no-callback registered value');
+            }
+        });
+
+        it('Call with existing id having async function, without callback', function () {
+            var returnDi = di.set('myId', function (di, callback) {
+                callback(null, 'something');
+            });
+
+            assert(returnDi, di);
+
+            try {
+                di.get('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Expected callback with callback registered value');
             }
         });
 
@@ -256,71 +249,8 @@ describe('Di', function () {
                 di.get('myId', null);
                 assert.fail('Expected error');
             } catch (e) {
-                assert.equal(e.message, 'Invalid argument callback : expected optional function');
+                assert.equal(e.message, 'Invalid argument callback : expected function');
             }
-        });
-
-        it('Call with existing id with callback on Promise registered', function () {
-            var returnDi = di.set('myId', Promise.resolve('something'));
-            assert(returnDi, di);
-
-            try {
-                di.get('myId', function () {});
-                assert.fail('Expected error');
-            } catch (e) {
-                assert.equal(e.message, 'Unexpected callback with non-async registered value');
-            }
-
-        });
-
-        it('Call with existing id having async native Promise resolving function', function (cb) {
-            var promiseValue = ['something'];
-
-            var promise = new Promise(function (resolve, reject) {
-                process.nextTick(function () {
-                    resolve(promiseValue);
-                });
-            });
-
-            var returnDi = di.set('myId', function (injectedDi) {
-                assert.strictEqual(injectedDi, di);
-                return promise;
-            });
-
-            assert(returnDi, di);
-
-            var call = di.get('myId', function (err, value) {
-                assert.strictEqual(err, null);
-                assert.strictEqual(value, promiseValue);
-                cb();
-            });
-
-            assert.strictEqual(call, promise);
-        });
-
-        it('Call with existing id having async native Promise rejecting function', function (cb) {
-            var error = new Error('Unable to connect to database');
-
-            var promise = new Promise(function (resolve, reject) {
-                process.nextTick(function () {
-                    reject(error);
-                });
-            });
-
-            var returnDi = di.set('myId', function (injectedDi) {
-                assert.strictEqual(injectedDi, di);
-                return promise;
-            });
-
-            assert(returnDi, di);
-
-            var call = di.get('myId', function (err, value) {
-                assert.strictEqual(arguments.length, 1);
-                assert.strictEqual(err, error);
-                cb();
-            });
-
-            assert.strictEqual(call, promise);
         });
 
         it('Call with existing id having async callback resolving function', function (cb) {
@@ -340,7 +270,7 @@ describe('Di', function () {
 
             var controlsCount = 0,
                 cbOnFinish = function () {
-                    if (++controlsCount === 3) {
+                    if (++controlsCount === 2) {
                         process.nextTick(function () {
                             cb();
                         });
@@ -359,15 +289,7 @@ describe('Di', function () {
                 cbOnFinish();
             });
 
-            assert(call instanceof Promise);
-
-            call.then(function (value) {
-                assert.strictEqual(value, callbackValue);
-                cbOnFinish();
-            }, function (e) {
-                assert.fail('No error Expected');
-            });
-
+            assert(call === undefined);
         });
 
         it('Call with existing id having async callback rejecting function', function (cb) {
@@ -387,7 +309,7 @@ describe('Di', function () {
 
             var controlsCount = 0,
                 cbOnFinish = function () {
-                    if (++controlsCount === 3) {
+                    if (++controlsCount === 2) {
                         process.nextTick(function () {
                             cb();
                         });
@@ -406,15 +328,7 @@ describe('Di', function () {
                 cbOnFinish();
             });
 
-            assert(call instanceof Promise);
-
-            call.then(function (value) {
-                assert.fail('No value Expected');
-            }, function (err) {
-                assert.strictEqual(err, callbackError);
-                cbOnFinish();
-            });
-
+            assert(call === undefined);
         });
 
     });
@@ -544,7 +458,7 @@ describe('Di', function () {
                 countCbWhenOk = 0;
 
             var cbWhenOk = function () {
-                if (++countCbWhenOk === 3) {
+                if (++countCbWhenOk === 2) {
                     assert.equal(callbackValues.length, 2);
                     assert.notEqual(callbackValues[0], callbackValues[1]);
                     cb();
@@ -565,19 +479,8 @@ describe('Di', function () {
                 cbWhenOk();
             });
 
-            assert(firstCall instanceof Promise);
-            assert(secondCall instanceof Promise);
-            assert.notEqual(firstCall, secondCall);
-
-            firstCall.then(function (value1) {
-                secondCall.then(function (value2) {
-                    assert.deepEqual(value1, ['something']);
-                    assert.deepEqual(value2, ['something']);
-                    assert.notEqual(value1, value2);
-                    cbWhenOk();
-                });
-            });
-
+            assert(firstCall === undefined);
+            assert(secondCall === undefined);
         });
 
         it('Call (normal) queue with #set', function () {

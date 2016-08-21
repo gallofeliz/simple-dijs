@@ -132,12 +132,12 @@ Di.prototype = {
             isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1,
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
-        if (isFunction && !isProtected) {
-            funcOrValue = this._fnCbToPromise(funcOrValue);
-        }
-
         this._definitions[id] = isFunction && !isProtected
-                                ? { func: funcOrValue, isFactory: isInFactory }
+                                ? {
+                                    func: funcOrValue,
+                                    isFactory: isInFactory,
+                                    hasCallbackArg: this._hasCallbackArg(funcOrValue)
+                                }
                                 : { value: funcOrValue };
 
         if (isInFactory) {
@@ -150,24 +150,11 @@ Di.prototype = {
 
         return this;
     },
-    _fnCbToPromise: function (func) {
-        var args = func.toString().match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1].replace(/ /g, '').split(',');
-
-        if (args.length < 2) {
-            return func;
-        }
-
-        return function (di) {
-            return new Promise(function (resolve, reject) {
-                func(di, function (err, value) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(value);
-                });
-            });
-        };
+    _hasCallbackArg: function (func) {
+        return func.toString()
+                    .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+                    .split(',')
+                    .length >= 2;
     },
     /**
         Get a value synchronously
@@ -192,31 +179,78 @@ Di.prototype = {
         var callback = arguments.length > 1 ? arguments[1] : undefined;
 
         if (callback !== undefined && typeof callback !== 'function') {
-            throw new Error('Invalid argument callback : expected optional function');
+            throw new Error('Invalid argument callback : expected function');
         }
 
         var definition = this._definitions[id],
-            hasValue = Object.keys(definition).indexOf('value') !== -1,
-            hasFunc = Object.keys(definition).indexOf('func') !== -1,
-            isFactory = hasFunc && definition.isFactory,
-            value = hasValue && !isFactory ? definition.value : definition.func(this);
+            isFuncDefinition = Object.keys(definition).indexOf('func') !== -1;
 
-        if (hasFunc && !isFactory && !hasValue) {
+        switch (true) {
+            case !isFuncDefinition:
+                return definition.value;
+            case definition.hasCallbackArg:
+                this._getCbFn(definition, callback);
+                return undefined;
+            default:
+                if (callback) {
+                    throw new Error('Unexpected callback with no-callback registered value');
+                }
+                return this._getFn(definition);
+        }
+    },
+    _getFn: function (definition) {
+        var hasValue = Object.keys(definition).indexOf('value') !== -1;
+
+        var value = hasValue && !definition.isFactory ? definition.value : definition.func(this);
+
+        if (!hasValue && !definition.isFactory) {
             definition.value = value;
         }
 
-        if (callback) {
-            if (!hasFunc || !(value instanceof Promise)) {
-                throw new Error('Unexpected callback with non-async registered value');
-            }
-            value.then(function (value) {
-                callback(null, value);
-            }, function (err) {
-                callback(err);
-            });
+        return value;
+    },
+    _getCbFn: function (definition, callback) {
+        var hasValue = Object.keys(definition).indexOf('value') !== -1;
+
+        if (!callback) {
+            throw new Error('Expected callback with callback registered value');
         }
 
-        return value;
+        if (hasValue && !definition.isFactory) {
+            callback(null, definition.value);
+            return;
+        }
+
+        if (definition.isFactory) {
+            this._execCbFn(definition.func, [callback]);
+            return;
+        }
+
+        if (typeof definition.callbacks === 'undefined') {
+            definition.callbacks = [function (err, value) {
+                if (!err) {
+                    definition.value = value;
+                }
+                delete definition.callbacks;
+            }, callback];
+            this._execCbFn(definition.func, definition.callbacks);
+            return;
+        }
+
+        definition.callbacks.push(callback);
+    },
+    _execCbFn: function (func, listeners) {
+        var callListeners = function (err, value) {
+            listeners.forEach(function (callback) {
+                err ? callback(err) : callback(err, value);
+            });
+        };
+
+        try {
+            func(this, callListeners);
+        } catch (e) {
+            callListeners(e);
+        }
     },
     /**
         Create a factory function
