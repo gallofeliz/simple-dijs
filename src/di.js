@@ -82,7 +82,14 @@ Di.prototype = {
         return typeof this._definitions[id] !== 'undefined';
     },
     /**
-        Set a value in the container
+        Set a value in the container. The registered value is default a synchronous value.
+
+        In case you use a function to factory your value :
+            - you can use the first injected argument that is the current Di instance.
+            - you can registering asynchronously your value by returning a native Promise or declaring and
+        calling the second possible argument "callback", as a normal node callback.
+
+        @summary Set a value in the container, synchronously or asynchronously
         @param {string} id The id of value
         @param {*} funcOrValue The value
         @returns {Di} himself
@@ -101,6 +108,10 @@ Di.prototype = {
         *@example <caption>Set a building function that returns a promise</caption>
             *di.set('config', function () {
             *   return fsPromise.readFile('config.json');
+            *})
+        *@example <caption>Set a building function that use callback for async</caption>
+            *di.set('config', function (di, callback) {
+            *   fs.readFile('config.json', callback);
             *})
     */
     set: function (id, funcOrValue) {
