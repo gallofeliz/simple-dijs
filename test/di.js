@@ -86,7 +86,7 @@ describe('Di', function () {
             assert.strictEqual(returned, di);
         });
 
-        it('Call (normal) sync function', function (cb) {
+        it('Call (normal) sync function', function () {
             var returned = di.set('myId', function (injectedDi) {
                 assert.strictEqual(injectedDi, di);
                 return 'something';
@@ -95,6 +95,28 @@ describe('Di', function () {
             assert.strictEqual(di.get('myId'), 'something');
             assert.strictEqual(returned, di);
         });
+
+        // No special support : Promise is a normal returned value
+        it('Call (normal) async promise function', function (cb) {
+            var returned = di.set('myId', function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
+                return Promise.resolve('something');
+            });
+
+            assert.strictEqual(returned, di);
+            var myId = di.get('myId');
+            assert(myId instanceof Promise);
+
+            di.get('myId').then(function (value) {
+                assert.equal(value, 'something');
+                cb();
+            });
+        });
+
+        it.skip('Call (normal) sync without returned value ?');
+        it.skip('Call (normal) async callback without called callback ?');
+        it.skip('Call (normal) async callback with returned Promise ?');
+        it.skip('Call (normal) async callback with returned value ?');
 
         it('Call (normal) async callback resolving function', function (cb) {
             var returned = di.set('myId', function (injectedDi, callback) {
@@ -195,7 +217,7 @@ describe('Di', function () {
             assert.strictEqual(di.get('myId'), 'something');
         });
 
-        it('Call with existing id having function', function () {
+        it('Call with existing id having sync function', function () {
             var returnDi = di.set('myId', function (injectedDi) {
                 assert.strictEqual(injectedDi, di);
                 return ['something'];
@@ -206,6 +228,152 @@ describe('Di', function () {
             assert.strictEqual(firstCall, secondCall);
             assert.deepEqual(firstCall, ['something']);
             assert(returnDi, di);
+        });
+
+        it.skip('Call with existing id having sync function, with callback ?');
+
+        it('Call with existing id having async native Promise resolving function', function (cb) {
+            var promiseValue = ['something'];
+
+            var promise = new Promise(function (resolve, reject) {
+                process.nextTrick(function () {
+                    resolve(promiseValue);
+                });
+            });
+
+            var returnDi = di.set('myId', function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
+                return promise;
+            });
+
+            assert(returnDi, di);
+
+            var call = di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, promiseValue);
+                cb();
+            });
+
+            assert.strictEqual(call, promise);
+        });
+
+        it('Call with existing id having async native Promise rejecting function', function (cb) {
+            var error = new Error('Unable to connect to database');
+
+            var promise = new Promise(function (resolve, reject) {
+                process.nextTrick(function () {
+                    reject(error);
+                });
+            });
+
+            var returnDi = di.set('myId', function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
+                return promise;
+            });
+
+            assert(returnDi, di);
+
+            var call = di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, error);
+                cb();
+            });
+
+            assert.strictEqual(call, promise);
+        });
+
+        it('Call with existing id having async callback resolving function', function (cb) {
+            var callbackValue = ['something'],
+                calledCount = 0;
+
+            var returnDi = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                assert(callback instanceof Function);
+                assert.equal(++calledCount, 1);
+                process.nextTrick(function () {
+                    callback(null, callbackValue);
+                });
+            });
+
+            assert(returnDi, di);
+
+            var controlsCount = 0,
+                cbOnFinish = function () {
+                    if (++controlsCount === 3) {
+                        process.nextTrick(function () {
+                            cb();
+                        });
+                    }
+                };
+
+            var call = di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, callbackValue);
+                cbOnFinish();
+            });
+
+            di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, callbackValue);
+                cbOnFinish();
+            });
+
+            assert(call instanceof Promise);
+
+            call.then(function (value) {
+                assert.strictEqual(value, callbackValue);
+                cbOnFinish();
+            }, function (e) {
+                assert.fail('No error Expected');
+            });
+
+        });
+
+        it('Call with existing id having async callback rejecting function', function (cb) {
+            var callbackError = new Error('Unable to connect to database'),
+                calledCount = 0;
+
+            var returnDi = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                assert(callback instanceof Function);
+                assert.equal(++calledCount, 1);
+                process.nextTrick(function () {
+                    callback(callbackError);
+                });
+            });
+
+            assert(returnDi, di);
+
+            var controlsCount = 0,
+                cbOnFinish = function () {
+                    if (++controlsCount === 3) {
+                        process.nextTrick(function () {
+                            cb();
+                        });
+                    }
+                };
+
+            var call = di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, callbackError);
+                cbOnFinish();
+            });
+
+            di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, callbackError);
+                cbOnFinish();
+            });
+
+            assert(call instanceof Promise);
+
+            call.then(function (value) {
+                assert.fail('No value Expected');
+            }, function (err) {
+                assert.strictEqual(err, callbackError);
+                cbOnFinish();
+            });
+
         });
 
     });
