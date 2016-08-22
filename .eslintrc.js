@@ -4,7 +4,7 @@ module.exports = {
         'standard'
     ],
     'rules': {
-       'indent': ['error', 4],
+       'indent': ['error', 4, { "SwitchCase": 1 }],
        'one-var': ['off'],
        'semi': ['error', 'always'],
        'eol-last': ['off'],
