@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var eslint = require('gulp-eslint');
 var del = require('del');
 var istanbul = require('gulp-istanbul');
 var mocha = require('gulp-mocha');
@@ -14,14 +13,18 @@ var path = require('path');
 var npmTestInstall = require('npm-test-install');
 var through = require('through2');
 var replace = require('gulp-replace');
+var exec = require('child_process').exec;
+var gutil = require('gulp-util');
 
 gulp.task('default', ['build']);
 // Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
 gulp.task('build', ['checks', 'build-dist', 'build-minify', 'test-npm-package']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
-gulp.task('checks', ['lint', 'test', 'browser-test']);
+gulp.task('checks', ['lint', 'test', 'browser-test', 'nodes-test']);
 
 gulp.task('lint', function () {
+    var eslint = require('gulp-eslint');
+
     return gulp.src(['src/*.js', '*.js', 'test/*.js'])
         .pipe(eslint())
         .pipe(eslint.format())
@@ -43,6 +46,38 @@ gulp.task('test', ['lint'], function (cb) {
                             .pipe(istanbul.enforceThresholds({ thresholds: { global: 98 } }))
                             .on('error', cb);
                 });
+});
+
+gulp.task('nodes-test', ['build-dist'], function (cb) {
+    var versions = [
+        '0.12', // legacy
+        '4.5', // Current LTS (--lts option seems to not work)
+        'node' // Current stable (6.4)
+    ];
+
+    var buildCmd = 'node_modules/.bin/gulp node-test';
+
+    var cmd = versions.map(function (version) {
+        return 'nvm exec ' + version + ' ' + buildCmd;
+    }).join(' && ');
+
+    cmd = '. ~/.nvm/nvm.sh 2>/dev/null ; ' + cmd;
+
+    exec(cmd, function (error, stdout, stderr) {
+        gutil.log(stdout);
+        gutil.log(stderr);
+        if (error) {
+            cb(error);
+            return;
+        }
+        cb();
+    });
+});
+
+gulp.task('node-test', function () {
+    return gulp.src(['test/di.js'])
+            .pipe(replace(/src\/di/, 'dist/di'))
+            .pipe(mocha());
 });
 
 gulp.task('browser-test', ['build-minify'], function (cb) {
