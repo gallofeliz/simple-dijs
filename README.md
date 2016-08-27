@@ -21,6 +21,7 @@ You can install from NPM or directly (manual build : `npm run build`)
 
 ```html
     <!-- Available global or ADM (requirejs), thanks to Browserify -->
+    <!-- Exists di.min.js -->
     <script src="lib/di.js" type="text/javascript"></script>
 ```    
 
@@ -68,13 +69,23 @@ You can install from NPM or directly (manual build : `npm run build`)
         return a + b;
     }));
 
-    // You can use promise
+    // You can use callbacks (node-style)
+
+    di.set('database', function (di, callback) {
+        dbConnect(url, callback);
+    });
+
+    di.get('database', function (err, database) {
+        database.use('users').query(...);
+    });
+
+    // You can use promise (native or not)
     
     di.set('async', function () {
-        return when.promise(/*Blabla*/);
+        return new Promise(/*Blabla*/);
     });
     
-    di.get('async').done(function () {
+    di.get('async').then(function () {
         // ...
     });
 
