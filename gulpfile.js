@@ -15,12 +15,13 @@ var through = require('through2');
 var replace = require('gulp-replace');
 var exec = require('child_process').exec;
 var gutil = require('gulp-util');
+var jsinspect = require('gulp-jsinspect');
 
 gulp.task('default', ['build']);
 // Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
 gulp.task('build', ['checks', 'build-dist', 'build-minify', 'test-npm-package']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
-gulp.task('checks', ['lint', 'test', 'browser-test', 'nodes-test']);
+gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test']);
 
 gulp.task('lint', function () {
     var eslint = require('gulp-eslint');
@@ -46,6 +47,20 @@ gulp.task('test', ['lint'], function (cb) {
                             .pipe(istanbul.enforceThresholds({ thresholds: { global: 98 } }))
                             .on('error', cb);
                 });
+});
+
+gulp.task('copy-paste-check', ['lint'], function (cb) {
+
+    gulp.src('src/di.js')
+        .pipe(jsinspect({
+            'threshold': 30,
+            'identifiers': true
+        }))
+        .pipe(jsinspect({
+            'threshold': 50,
+            'identifiers': false
+        }));
+
 });
 
 gulp.task('nodes-test', ['build-dist'], function (cb) {
