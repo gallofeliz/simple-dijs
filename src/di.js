@@ -2,7 +2,7 @@
     Create a new Container
 
     @constructor
-    @param [values] {Object.<string, *>} Values to set on construction (eqiv batchSet {@link Di#batchSet})
+    @param {Object.<string, *>} [values] Values to set on construction (eqiv batchSet {@link Di#batchSet})
     @example
         var di = new Di()
     *@example
@@ -21,11 +21,32 @@ var Di = function (values) {
     }
 };
 
+/**
+    Get a value asynchronously with callback (registered with callback)
+    @method get
+    @memberof Di
+    @instance
+    @variation 2
+    @param {string}      id The value id
+    @param {function}    [callback] The callback
+    @returns {undefined}
+    @throws {Error} Missing or incorrect argument
+    @throws {Error} Missing value (not registered)
+    @throws {Error} Unexpected callback for no-callback registered value
+    @throws {Error} Invalid callback
+    @example
+        *di.get('database', function (err, database) {
+        *    if (err) {
+        *        // ...
+        *    }
+        *    database.find(userId);
+        *})
+*/
 Di.prototype = {
     /**
         Multiple set values
 
-        @param values {Object.<string, *>} Values to set
+        @param {Object.<string, *>} values Values to set
         @throws {Error} If values is not provided or not Object
         @returns {Di} himself
         @example
@@ -50,18 +71,25 @@ Di.prototype = {
     /**
         Check that the container owns the provided id
 
-        @param id {string} Id to check
-        @returns {boolean}
+        @param {string} id Id to check
+        @returns {boolean} If id is owned by the container
         @example
             di.has('database') || di.set('database', ...)
     */
     has: function (id) {
-        return typeof this._definitions[id] === 'undefined' ? false : true;
+        return typeof this._definitions[id] !== 'undefined';
     },
     /**
-        Set a value in the container
-        @param id {string} The id of value
-        @param funcOrValue {*} The value
+        Set a value in the container. The registered value is by default the returned value.
+
+        In case you use a function to factory your value :
+            - you can use the first injected argument that is the current Di instance.
+            - you can register your value (for example for asynchronous) by declaring and
+        calling the second possible argument "callback", as a normal node callback.
+
+        @summary Set a value in the container, synchronously or asynchronously
+        @param {string} id The id of value
+        @param {*} funcOrValue The value
         @returns {Di} himself
         @throws {Error} if missing or incorrect arguments
         @throws {Error} if Id is already registered
@@ -79,9 +107,12 @@ Di.prototype = {
             *di.set('config', function () {
             *   return fsPromise.readFile('config.json');
             *})
+        *@example <caption>Set a building function that use callback for async</caption>
+            *di.set('config', function (di, callback) {
+            *   fs.readFile('config.json', callback);
+            *})
     */
     set: function (id, funcOrValue) {
-
 
         if (typeof id !== 'string') {
             throw new Error('Expected argument id type string');
@@ -96,36 +127,43 @@ Di.prototype = {
         }
 
         var isFunction = typeof funcOrValue === 'function',
-            isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1;
+            isProtected = isFunction && this._protect.indexOf(funcOrValue) !== -1,
             isInFactory = isFunction && this._factory.indexOf(funcOrValue) !== -1;
 
-        this._definitions[id] = isFunction && !isProtected ?
-                                { func: isInFactory ? funcOrValue : this._single(funcOrValue) } :
-                                { value: funcOrValue };
+        this._definitions[id] = isFunction && !isProtected
+                                ? {
+                                    func: funcOrValue,
+                                    isFactory: isInFactory,
+                                    hasCallbackArg: this._hasCallbackArg(funcOrValue)
+                                }
+                                : { value: funcOrValue };
 
         if (isInFactory) {
             this._factory.splice(this._factory.indexOf(funcOrValue), 1);
         }
 
         if (isProtected) {
-            this._protect.splice(this._protect.indexOf(funcOrValue), 1);   
+            this._protect.splice(this._protect.indexOf(funcOrValue), 1);
         }
 
         return this;
     },
+    _hasCallbackArg: function (func) {
+        return func.toString()
+                    .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+                    .split(',')
+                    .length >= 2;
+    },
     /**
-        Get a value
+        Get a value synchronously
 
-        @param id {string} The value id
+        @param {string} id The value id
         @returns {*} The value
         @throws {Error} Missing or incorrect argument
         @throws {Error} Missing value (not registered)
+        @throws {Error} Missing callback for callback-registered value
         @example
             di.get('database').find(userId)
-        *@example
-            *di.get('database').done(function (database) {
-            *   database.find(userId);
-            *})
     */
     get: function (id) {
 
@@ -138,16 +176,78 @@ Di.prototype = {
         }
 
         var definition = this._definitions[id],
-            hasValue = Object.keys(definition).indexOf('value') !== -1;
+            isFuncDefinition = Object.keys(definition).indexOf('func') !== -1;
 
-        return hasValue ?
-            definition.value :
-            definition.func(this);
+        switch (true) {
+            case !isFuncDefinition:
+                return definition.value;
+            case definition.hasCallbackArg:
+                if (arguments.length < 2 || typeof arguments[1] !== 'function') {
+                    throw new Error('Expected callback function with callback registered value');
+                }
+                this._getCbFn(definition, arguments[1]);
+                return undefined;
+            default:
+                if (arguments.length > 1) {
+                    throw new Error('Unexpected callback with no-callback registered value');
+                }
+                return this._getFn(definition);
+        }
+    },
+    _getFn: function (definition) {
+        var hasValue = Object.keys(definition).indexOf('value') !== -1;
+
+        var value = hasValue && !definition.isFactory ? definition.value : definition.func(this);
+
+        if (!hasValue && !definition.isFactory) {
+            definition.value = value;
+        }
+
+        return value;
+    },
+    _getCbFn: function (definition, callback) {
+        var hasValue = Object.keys(definition).indexOf('value') !== -1;
+
+        if (hasValue && !definition.isFactory) {
+            callback(null, definition.value);
+            return;
+        }
+
+        if (definition.isFactory) {
+            this._execCbFn(definition.func, [callback]);
+            return;
+        }
+
+        if (typeof definition.callbacks === 'undefined') {
+            definition.callbacks = [function (err, value) {
+                if (!err) {
+                    definition.value = value;
+                }
+                delete definition.callbacks;
+            }, callback];
+            this._execCbFn(definition.func, definition.callbacks);
+            return;
+        }
+
+        definition.callbacks.push(callback);
+    },
+    _execCbFn: function (func, listeners) {
+        var callListeners = function (err, value) {
+            listeners.forEach(function (callback) {
+                err ? callback(err) : callback(err, value);
+            });
+        };
+
+        try {
+            func(this, callListeners);
+        } catch (e) {
+            callListeners(e);
+        }
     },
     /**
         Create a factory function
         @see Di#set
-        @param func {Function} The function to factory
+        @param {Function} func The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
         @throws {Error} Protected function
@@ -177,16 +277,10 @@ Di.prototype = {
     keys: function () {
         return Object.keys(this._definitions);
     },
-    _single: function (func) {
-        return function (di) {
-            this.value = func(di);
-            return this.value;
-        };
-    },
     /**
         Protect a function to store as raw
         @see Di#set
-        @param func {Function} The function to factory
+        @param {Function} func The function to factory
         @returns {Function} The same function
         @throws {Error} Missing or incorrect argument
         @throws {Error} Factory function
@@ -212,7 +306,7 @@ Di.prototype = {
     /**
         Remove a value
 
-        @param id {string} The value id
+        @param {string} id The value id
         @returns {Di} himself
         @throws {Error} Missing or incorrect argument
         @throws {Error} Missing value (not registered)

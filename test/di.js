@@ -1,7 +1,7 @@
-var assert = require("assert");
-var Di = require('../dist/di');
+var assert = require('assert');
+var Di = require('../src/di');
 
-describe('Di', function() {
+describe('Di', function () {
 
     var di;
 
@@ -86,6 +86,46 @@ describe('Di', function() {
             assert.strictEqual(returned, di);
         });
 
+        it('Call (normal) sync function', function () {
+            var returned = di.set('myId', function (injectedDi) {
+                assert.strictEqual(injectedDi, di);
+                return 'something';
+            });
+
+            assert.strictEqual(di.get('myId'), 'something');
+            assert.strictEqual(returned, di);
+        });
+
+        it('Call (normal) async callback resolving function', function (cb) {
+            var returned = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                callback(null, 'something');
+            });
+
+            assert.strictEqual(returned, di);
+            di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, 'something');
+                cb();
+            });
+        });
+
+        it('Call (normal) async callback rejecting function', function (cb) {
+            var error = new Error('Error connection database');
+
+            var returned = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                callback(error);
+            });
+
+            assert.strictEqual(returned, di);
+            di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, error);
+                cb();
+            });
+        });
+
     });
 
     it('#register alias of #set', function () {
@@ -155,7 +195,7 @@ describe('Di', function() {
             assert.strictEqual(di.get('myId'), 'something');
         });
 
-        it('Call with existing id having function', function () {
+        it('Call with existing id having sync function', function () {
             var returnDi = di.set('myId', function (injectedDi) {
                 assert.strictEqual(injectedDi, di);
                 return ['something'];
@@ -166,6 +206,134 @@ describe('Di', function() {
             assert.strictEqual(firstCall, secondCall);
             assert.deepEqual(firstCall, ['something']);
             assert(returnDi, di);
+        });
+
+        it('Call with existing id having sync function, with callback', function () {
+            var returnDi = di.set('myId', function (di) {
+                return 'something';
+            });
+
+            assert(returnDi, di);
+
+            try {
+                di.get('myId', function () {});
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Unexpected callback with no-callback registered value');
+            }
+        });
+
+        it('Call with existing id having async function, without callback', function () {
+            var returnDi = di.set('myId', function (di, callback) {
+                callback(null, 'something');
+            });
+
+            assert(returnDi, di);
+
+            try {
+                di.get('myId');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Expected callback function with callback registered value');
+            }
+        });
+
+        it('Call with existing id with invalid callback', function () {
+            var returnDi = di.set('myId', function (di, callback) {
+                callback(null, 'something');
+            });
+
+            assert(returnDi, di);
+
+            try {
+                di.get('myId', null);
+                assert.fail('Expected error');
+            } catch (e) {
+                assert.equal(e.message, 'Expected callback function with callback registered value');
+            }
+        });
+
+        it('Call with existing id having async callback resolving function', function (cb) {
+            var callbackValue = ['something'],
+                calledCount = 0;
+
+            var returnDi = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                assert(callback instanceof Function);
+                assert.equal(++calledCount, 1);
+                process.nextTick(function () {
+                    callback(null, callbackValue);
+                });
+            });
+
+            assert(returnDi, di);
+
+            var controlsCount = 0,
+                cbOnFinish = function () {
+                    if (++controlsCount === 2) {
+                        process.nextTick(function () {
+                            cb();
+                        });
+                    }
+                };
+
+            var call = di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, callbackValue);
+
+                di.get('myId', function (err, value) {
+                    assert.strictEqual(err, null);
+                    assert.strictEqual(value, callbackValue);
+                    cbOnFinish();
+                });
+            });
+
+            di.get('myId', function (err, value) {
+                assert.strictEqual(err, null);
+                assert.strictEqual(value, callbackValue);
+                cbOnFinish();
+            });
+
+            assert(call === undefined);
+        });
+
+        it('Call with existing id having async callback rejecting function', function (cb) {
+            var callbackError = new Error('Unable to connect to database'),
+                calledCount = 0;
+
+            var returnDi = di.set('myId', function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                assert(callback instanceof Function);
+                assert.equal(++calledCount, 1);
+                process.nextTick(function () {
+                    callback(callbackError);
+                });
+            });
+
+            assert(returnDi, di);
+
+            var controlsCount = 0,
+                cbOnFinish = function () {
+                    if (++controlsCount === 2) {
+                        process.nextTick(function () {
+                            cb();
+                        });
+                    }
+                };
+
+            var call = di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, callbackError);
+                cbOnFinish();
+            });
+
+            di.get('myId', function (err, value) {
+                assert.strictEqual(arguments.length, 1);
+                assert.strictEqual(err, callbackError);
+                cbOnFinish();
+            });
+
+            assert(call === undefined);
         });
 
     });
@@ -206,7 +374,7 @@ describe('Di', function() {
 
         it('Call on factory function', function () {
             var factoryFunc = di.factory(function (di) {
-                return new Database();
+                return {};
             });
 
             try {
@@ -282,6 +450,44 @@ describe('Di', function() {
             assert.notEqual(firstCall, secondCall);
         });
 
+        it('Call (normal) with async callback #set', function (cb) {
+            di.set('myId', di.factory(function (injectedDi, callback) {
+                assert.strictEqual(injectedDi, di);
+                assert(callback instanceof Function);
+                process.nextTick(function () {
+                    callback(null, ['something']);
+                });
+            }));
+
+            var callbackValues = [],
+                countCbWhenOk = 0;
+
+            var cbWhenOk = function () {
+                if (++countCbWhenOk === 2) {
+                    assert.equal(callbackValues.length, 2);
+                    assert.notEqual(callbackValues[0], callbackValues[1]);
+                    cb();
+                }
+            };
+
+            var firstCall = di.get('myId', function (e, value) {
+                assert.strictEqual(e, null);
+                assert.deepEqual(value, ['something']);
+                callbackValues.push(value);
+                cbWhenOk();
+            });
+
+            var secondCall = di.get('myId', function (e, value) {
+                assert.strictEqual(e, null);
+                assert.deepEqual(value, ['something']);
+                callbackValues.push(value);
+                cbWhenOk();
+            });
+
+            assert(firstCall === undefined);
+            assert(secondCall === undefined);
+        });
+
         it('Call (normal) queue with #set', function () {
             var factoryMyId = di.factory(function (injectedDi) {
                     assert.strictEqual(injectedDi, di);
@@ -310,24 +516,59 @@ describe('Di', function() {
 
     });
 
-    it('Integration test', function () {
+    it('Integration test', function (cb) {
 
-        di.set('userCollection', function (injectedDi) {
-            return {
-                find: function (id) {
-                    return { name: 'Paul' };
-                }
-            };
+        var dbConnect = function (url, callback) {
+            process.nextTick(function () {
+                callback(null, { connected: true });
+            });
+        };
+
+        di.set('database-url', 'mysql://127.0.0.1')
+        .set('database', function (injectedDi, callback) {
+            dbConnect(injectedDi.get('database-url'), callback);
         })
-          .set('userService', function (injectedDi) {
+        .set('userCollection', function (injectedDi, callback) {
+            injectedDi.get('database', function () {
+                callback(null, {
+                    find: function (id) {
+                        return { name: 'Paul' };
+                    }
+                });
+            });
+        })
+        .set('userService', function (injectedDi) {
             return {
                 getName: function (who) {
-                    return injectedDi.get('userCollection').find(who).name;
+                    return new Promise(function (resolve) {
+                        injectedDi.get('userCollection', function (e, userCollection) {
+                            resolve(userCollection.find(who).name);
+                        });
+                    });
                 }
             };
         });
 
-        assert.strictEqual(di.get('userService').getName(1), 'Paul');
+        var countCbWhenOk = 0,
+            cbOnFinish = function () {
+                if (++countCbWhenOk === 2) {
+                    cb();
+                }
+            };
+
+        if (typeof Promise === 'function') {
+            di.get('userService').getName(1).then(function (name) {
+                assert.strictEqual(name, 'Paul');
+                cbOnFinish();
+            });
+        } else {
+            cbOnFinish();
+        }
+
+        di.get('userCollection', function (e, userCollection) {
+            assert.strictEqual(userCollection.find(1).name, 'Paul');
+            cbOnFinish();
+        });
     });
 
 });
