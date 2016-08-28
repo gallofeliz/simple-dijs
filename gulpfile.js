@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var eslint = require('gulp-eslint');
 var del = require('del');
 var istanbul = require('gulp-istanbul');
 var mocha = require('gulp-mocha');
@@ -12,16 +11,96 @@ var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var fs = require('fs');
 var path = require('path');
 var npmTestInstall = require('npm-test-install');
+var through = require('through2');
+var replace = require('gulp-replace');
+var exec = require('child_process').exec;
+var gutil = require('gulp-util');
 
 gulp.task('default', ['build']);
-gulp.task('build', ['checks', 'build-dist', 'build-minify']);
-gulp.task('checks', ['lint', 'test', 'browser-test', 'test-npm-package']);
+// Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
+gulp.task('build', ['checks', 'build-dist', 'build-minify', 'test-npm-package']);
+// Checking is syntax check, then test raw code with code coverage, and then test on target platforms
+gulp.task('checks', ['lint', 'test', 'browser-test', 'nodes-test']);
 
 gulp.task('lint', function () {
+    var eslint = require('gulp-eslint');
+
     return gulp.src(['src/*.js', '*.js', 'test/*.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
+});
+
+gulp.task('test', ['lint'], function (cb) {
+    del.sync(['coverage']);
+    return gulp.src(['src/di.js'])
+                .pipe(istanbul({includeUntested: true}))
+                .pipe(istanbul.hookRequire())
+                .on('end', function () {
+                    return gulp.src(['test/di.js'])
+                            .pipe(mocha())
+                            .pipe(istanbul.writeReports({
+                                dir: 'coverage',
+                                reportOpts: { dir: 'coverage' }
+                            }))
+                            .pipe(istanbul.enforceThresholds({ thresholds: { global: 98 } }))
+                            .on('error', cb);
+                });
+});
+
+gulp.task('nodes-test', ['build-dist'], function (cb) {
+    var versions = [
+        '0.12', // legacy
+        '4.5', // Current LTS (--lts option seems to not work)
+        'node' // Current stable (6.4)
+    ];
+
+    var buildCmd = './node_modules/.bin/gulp node-test';
+
+    var cmd = versions.map(function (version) {
+        return 'nvm use ' + version + ' && ' + buildCmd;
+    }).join(' && ');
+
+    cmd = '. ~/.nvm/nvm.sh 2>/dev/null ; ' + cmd;
+
+    exec(cmd, function (error, stdout, stderr) {
+        gutil.log(stdout);
+        gutil.log(stderr);
+        if (error) {
+            cb(error);
+            return;
+        }
+        cb();
+    });
+});
+
+gulp.task('node-test', function () {
+    return gulp.src(['test/di.js'])
+            .pipe(replace(/src\/di/, 'dist/di'))
+            .pipe(mocha());
+});
+
+gulp.task('browser-test', ['build-minify'], function (cb) {
+
+    gulp.src('test/di.js')
+        .pipe(replace(/var Di(.*);/, ''))
+        .pipe(through.obj(function (file, enc, cb) {
+            file.contents = browserify(file).bundle();
+            cb(null, file);
+        }))
+        .pipe(rename('di.browser.js'))
+        .pipe(gulp.dest('test'))
+        .on('end', function () {
+            return gulp.src('test/di.browser.html')
+                        .pipe(mochaPhantomJS())
+                        .on('error', function (e) {
+                            del(['test/di.browser.js']); cb(e);
+                        })
+                        .on('finish', function () {
+                            del(['test/di.browser.js']); cb();
+                        });
+        });
+
 });
 
 gulp.task('build-dist', ['lint'], function () {
@@ -41,43 +120,6 @@ gulp.task('build-minify', ['build-dist'], function () {
         .pipe(rename('di.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest('dist'));
-});
-
-gulp.task('test', ['lint', 'build-dist'], function (cb) {
-    del.sync(['coverage']);
-    return gulp.src(['dist/di.js'])
-                .pipe(istanbul({includeUntested: true}))
-                .pipe(istanbul.hookRequire())
-                .on('end', function () {
-                    return gulp.src(['test/*.js'])
-                            .pipe(mocha())
-                            .pipe(istanbul.writeReports({
-                                dir: 'coverage',
-                                reportOpts: { dir: 'coverage' }
-                            }))
-                            .pipe(istanbul.enforceThresholds({ thresholds: { global: 70 } }))
-                            .on('error', cb);
-                });
-});
-
-gulp.task('browser-test', ['build-minify'], function (cb) {
-
-    browserify(
-        ['test/di.js']
-    ).bundle()
-     .pipe(source('di.js'))
-     .pipe(gulp.dest('test/browser'))
-     .on('end', function () {
-         return gulp.src('test/browser/browser.html')
-                    .pipe(mochaPhantomJS())
-                    .on('error', function (e) {
-                        del(['test/browser/di.js']); cb(e);
-                    })
-                    .on('finish', function () {
-                        del(['test/browser/di.js']); cb();
-                    });
-     });
-
 });
 
 gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
