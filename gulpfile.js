@@ -55,10 +55,10 @@ gulp.task('nodes-test', ['build-dist'], function (cb) {
         'node' // Current stable (6.4)
     ];
 
-    var buildCmd = 'node_modules/.bin/gulp node-test';
+    var buildCmd = './node_modules/.bin/gulp node-test';
 
     var cmd = versions.map(function (version) {
-        return 'nvm exec ' + version + ' ' + buildCmd;
+        return 'nvm use ' + version + ' && ' + buildCmd;
     }).join(' && ');
 
     cmd = '. ~/.nvm/nvm.sh 2>/dev/null ; ' + cmd;
