@@ -58,8 +58,6 @@ You can install from NPM or directly (manual build : `npm run build`)
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // Other UserCollection instance now, instanciated now !
     
-    // You can also use di.register() alias of di.set()
-    
     // You can store raw values
     di.set('port', 80);
     di.get('port'); // 80
