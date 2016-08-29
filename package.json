@@ -14,10 +14,6 @@
     "type": "git",
     "url": "git://github.com/avighier/simple-dijs.git"
   },
-  "scripts": {
-    "test": "node_modules/.bin/gulp build",
-    "prepublish": "node_modules/.bin/gulp build"
-  },
   "keywords": [
     "dependency",
     "injection",
