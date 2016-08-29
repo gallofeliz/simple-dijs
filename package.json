@@ -26,7 +26,6 @@
   "author": "Aubin VIGHIER",
   "license": "ISC",
   "devDependencies": {
-    "bower": "^1.7.9",
     "browserify": "^13.0.1",
     "del": "^2.2.1",
     "docdash": "^0.4.0",
