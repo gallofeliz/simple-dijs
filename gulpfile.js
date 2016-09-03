@@ -21,7 +21,7 @@ gulp.task('default', ['build']);
 // Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
 gulp.task('build', ['checks', 'build-dist', 'build-minify', 'test-npm-package']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
-gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test']);
+gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test', 'npm-check']);
 
 gulp.task('lint', function () {
     var eslint = require('gulp-eslint');
@@ -30,6 +30,14 @@ gulp.task('lint', function () {
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
+});
+
+gulp.task('npm-check', function (cb) {
+    exec(path.join('node_modules', '.bin', 'npm-check'), function (e, stdout, stderr) {
+        gutil.log(stdout);
+        gutil.log(stderr);
+        cb();
+    });
 });
 
 gulp.task('test', ['lint'], function (cb) {
