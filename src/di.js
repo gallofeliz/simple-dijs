@@ -334,6 +334,10 @@ Di.prototype = {
     */
 };
 
+/**
+    @deprecated Use {@link Di#set} instead
+    @method
+*/
 Di.prototype.register = Di.prototype.set;
 
 module.exports = Di;
