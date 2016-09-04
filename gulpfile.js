@@ -44,7 +44,7 @@ gulp.task('build-readme', ['lint'], function (cb) {
     var cmd = path.join('node_modules', '.bin', 'jsdoc2md'),
         args = '-s name -d 3 -t README.hbs --separators src/di.js';
 
-    exec(`${cmd} ${args} > README.md`, function (error, stdout, stderr) {
+    exec([cmd, args, '> README.md'].join(' '), function (error, stdout, stderr) {
         gutil.log(stdout);
         gutil.log(stderr);
         if (error) {
