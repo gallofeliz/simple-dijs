@@ -15,12 +15,13 @@ var through = require('through2');
 var replace = require('gulp-replace');
 var exec = require('child_process').exec;
 var gutil = require('gulp-util');
+var jsinspect = require('gulp-jsinspect');
 
 gulp.task('default', ['build']);
 // Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
-gulp.task('build', ['checks', 'build-dist', 'build-minify', 'test-npm-package']);
+gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme', 'test-npm-package']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
-gulp.task('checks', ['lint', 'test', 'browser-test', 'nodes-test']);
+gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test', 'npm-check']);
 
 gulp.task('lint', function () {
     var eslint = require('gulp-eslint');
@@ -29,6 +30,29 @@ gulp.task('lint', function () {
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
+});
+
+gulp.task('npm-check', function (cb) {
+    exec(path.join('node_modules', '.bin', 'npm-check'), function (e, stdout, stderr) {
+        gutil.log(stdout);
+        gutil.log(stderr);
+        cb();
+    });
+});
+
+gulp.task('build-readme', ['lint'], function (cb) {
+    var cmd = path.join('node_modules', '.bin', 'jsdoc2md'),
+        args = '-s name -d 3 -t README.hbs --separators src/di.js';
+
+    exec([cmd, args, '> README.md'].join(' '), function (error, stdout, stderr) {
+        gutil.log(stdout);
+        gutil.log(stderr);
+        if (error) {
+            cb(error);
+            return;
+        }
+        cb();
+    });
 });
 
 gulp.task('test', ['lint'], function (cb) {
@@ -46,6 +70,20 @@ gulp.task('test', ['lint'], function (cb) {
                             .pipe(istanbul.enforceThresholds({ thresholds: { global: 98 } }))
                             .on('error', cb);
                 });
+});
+
+gulp.task('copy-paste-check', ['lint'], function (cb) {
+
+    gulp.src('src/di.js')
+        .pipe(jsinspect({
+            'threshold': 30,
+            'identifiers': true
+        }))
+        .pipe(jsinspect({
+            'threshold': 50,
+            'identifiers': false
+        }));
+
 });
 
 gulp.task('nodes-test', ['build-dist'], function (cb) {
