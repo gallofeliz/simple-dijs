@@ -1,6 +1,12 @@
 # SIMPLE-DIJS
 
-## Install
+Simple Javascript Dependency Injection Container (DI) like Pimple
+
+[![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+[![npm](https://img.shields.io/github/issues-raw/avighier/simple-dijs/bug.svg?label=bugs)](https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![npm](https://img.shields.io/npm/dm/simple-dijs.svg)](http://www.npm-stats.com/~packages/simple-dijs)
+
+## Installation
 
 - You can install from NPM
 
@@ -93,11 +99,13 @@
     (new Di()).set(...).set(...);
 ```
 
-## Quality
+## Quality and license
 
-- A complete build is configured. Always green before release : [![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+- A complete build is configured. Always green before release
 - Tests are written before code (TDD) : The what before the how
-- Please report issues and suggestions
+- Please **report issues** and suggestions https://github.com/avighier/simple-dijs/issues
+- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/avighier/simple-dijs.svg?style=social&label=Watch)](https://github.com/avighier/simple-dijs)
+- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/avighier/simple-dijs.svg?style=social&label=Star)](https://github.com/avighier/simple-dijs)
 
 ## API Reference
 <a name="Di"></a>
