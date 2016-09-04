@@ -1,14 +1,15 @@
-# simple-dijs
+# SIMPLE-DIJS
 
-Please visit our website for full documentation https://avighier.github.io/simple-dijs/
+## Install
 
-##Install
-
-You can install from NPM or directly (manual build : `npm run build`)
+- You can install from NPM
 
 ```bash
     npm install --save simple-dijs
 ```
+
+- from github releases (soon) https://github.com/avighier/simple-dijs/releases/latest (downloads)
+- from the source code (download source or fork, and then build it)
 
 ## Integration
 
@@ -23,7 +24,9 @@ You can install from NPM or directly (manual build : `npm run build`)
     <!-- Available global or ADM (requirejs), thanks to Browserify -->
     <!-- Exists di.min.js -->
     <script src="lib/di.js" type="text/javascript"></script>
-```    
+```
+
+## Examples to use
 
 ```javascript
     // Simple instanciation
@@ -91,7 +94,13 @@ You can install from NPM or directly (manual build : `npm run build`)
     (new Di()).set(...).set(...);
 ```
 
-[![](https://piwik.avighier.fr/piwik.php?idsite=2&rec=1)]()
+## Quality
+
+- A complete build is configured. Always green before release : [![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+- Tests are written before code (TDD) : The what before the how
+- Please report issues and suggestions
 
 ## API Reference
 {{>main}}
+
+[![](https://piwik.avighier.fr/piwik.php?idsite=2&rec=1)]()
