@@ -28,7 +28,7 @@ var Di = function (values) {
     @instance
     @variation 2
     @param {string}      id The value id
-    @param {function}    [callback] The callback
+    @param {function}    callback The callback
     @returns {undefined}
     @throws {Error} Missing or incorrect argument
     @throws {Error} Missing value (not registered)
@@ -80,12 +80,12 @@ Di.prototype = {
         return typeof this._definitions[id] !== 'undefined';
     },
     /**
-        Set a value in the container. The registered value is by default the returned value.
-
-        In case you use a function to factory your value :
-            - you can use the first injected argument that is the current Di instance.
-            - you can register your value (for example for asynchronous) by declaring and
-        calling the second possible argument "callback", as a normal node callback.
+        *Set a value in the container. The registered value is by default the returned value.
+        *
+        *In case you use a function to factory your value :
+        *    - you can use the first injected argument that is the current Di instance.
+        *    - you can register your value (for example for asynchronous) by declaring and
+        *calling the second possible argument "callback", as a normal node callback.
 
         @summary Set a value in the container, synchronously or asynchronously
         @param {string} id The id of value
@@ -334,6 +334,10 @@ Di.prototype = {
     */
 };
 
+/**
+    @deprecated Use {@link Di#set} instead
+    @method
+*/
 Di.prototype.register = Di.prototype.set;
 
 module.exports = Di;
