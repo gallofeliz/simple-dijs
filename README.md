@@ -9,7 +9,6 @@
 ```
 
 - from github releases (soon) https://github.com/avighier/simple-dijs/releases/latest (downloads)
-- from the source code (download source or fork, and then build it)
 
 ## Integration
 
