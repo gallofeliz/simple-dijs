@@ -19,7 +19,7 @@ var jsinspect = require('gulp-jsinspect');
 
 gulp.task('default', ['build']);
 // Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
-gulp.task('build', ['checks', 'build-dist', 'build-minify', 'test-npm-package']);
+gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme', 'test-npm-package']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
 gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test', 'npm-check']);
 
@@ -36,6 +36,21 @@ gulp.task('npm-check', function (cb) {
     exec(path.join('node_modules', '.bin', 'npm-check'), function (e, stdout, stderr) {
         gutil.log(stdout);
         gutil.log(stderr);
+        cb();
+    });
+});
+
+gulp.task('build-readme', ['lint'], function (cb) {
+    var cmd = path.join('node_modules', '.bin', 'jsdoc2md'),
+        args = '-s name -d 3 -t README.hbs --separators src/di.js';
+
+    exec(`${cmd} ${args} > README.md`, function (error, stdout, stderr) {
+        gutil.log(stdout);
+        gutil.log(stderr);
+        if (error) {
+            cb(error);
+            return;
+        }
         cb();
     });
 });
