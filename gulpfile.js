@@ -16,12 +16,17 @@ var replace = require('gulp-replace');
 var exec = require('child_process').exec;
 var gutil = require('gulp-util');
 var jsinspect = require('gulp-jsinspect');
+var tmp = require('tmp');
+var glob = require('glob');
+var assert = require('assert');
 
 gulp.task('default', ['build']);
-// Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
-gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme', 'test-npm-package']);
+// Build is checking and then building dist files : di.js and di.min.js
+gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
 gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test', 'npm-check']);
+// Checking package content, publish on NPM and building ZIP to publish on Github
+gulp.task('publish', ['build', 'check-package', '_publish-npm', '_publish_github']);
 
 gulp.task('lint', function () {
     var eslint = require('gulp-eslint');
@@ -160,36 +165,79 @@ gulp.task('build-minify', ['build-dist'], function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
+var tmpPackage = function () {
+    return new Promise(function (resolve, reject) {
+        exec('npm pack', function (error, stdout, stderr) {
 
-    npmTestInstall('simple-dijs', __dirname, true).then(function (install) {
-        var mainFile = require('./package.json').main,
-            miniFile = mainFile.replace(/\.js$/, '.min.js');
-
-        var missingFiles = [ mainFile, miniFile ].filter(function (filename) {
-            try {
-                fs.accessSync(path.join(install.getPackageDir(), filename));
-                return false;
-            } catch (e) {
-                return true;
+            if (error || stderr !== '') {
+                gutil.log(stderr);
+                return reject(error);
             }
-        });
 
-        if (missingFiles.length > 0) {
-            install.free().then(function () {
-                cb('Missing files ' + missingFiles.join(', '));
-            }, function (e) {
-                console.warn(e);
-                cb('Missing files ' + missingFiles.join(', '));
+            var filename = stdout.trim();
+
+            tmp.dir(function (err, tmpDir) {
+                if (err) {
+                    fs.unlink(filename);
+                    return reject(err);
+                }
+
+                exec('tar --strip-components=1 -xzf ' + filename.replace(/\\/g, '\\\\') + ' -C ' + tmpDir.replace(/\\/g, '\\\\'), function (error, stdout, stderr) {
+                    fs.unlink(filename);
+                    if (error || stderr) {
+                        gutil.log(stderr);
+                        return reject(error);
+                    }
+
+                    resolve(tmpDir);
+
+                    process.on('exit', function () {
+                        del.sync([tmpDir], {force:true});
+                    });
+                })
+
             });
-            return;
-        }
-
-        console.log('No missing files');
-        install.free().then(cb, function (e) {
-            console.warn(e);
-            cb();
         });
-    }, cb);
+    })
+};
+
+gulp.task('check-package', function (cb) {
+    tmpPackage()
+        .then(function (directory) {
+
+            glob('**', {cwd: directory, nodir: true, dot: true}, function (err, files) {
+
+                if (err) {
+                    return reject(err);
+                }
+
+                var packageEntry = require('./package.json').main;
+                var packageExpectation = [
+                    'dist/di.js',
+                    'dist/di.min.js',
+                    'package.json',
+                    'README.md',
+                    'README.hbs' // @see https://docs.npmjs.com/misc/developers : never ignored "README (and its variants)"
+                ];
+
+                try {
+                    assert.deepStrictEqual(packageExpectation.sort(), files.sort(), 'Expected ' + packageExpectation.sort().join(', ') + ' Given ' + files.sort().join(', '));
+                    assert(files.includes(packageEntry))
+                    cb();
+                } catch (e) {
+                    cb(e);
+                }
+            });
+
+
+        })
+        .catch(cb);
+});
+
+gulp.task('_publish-npm', ['check-package'], function () {
+
+});
+
+gulp.task('_publish_github', ['check-package'], function () {
 
 });
