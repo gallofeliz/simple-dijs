@@ -14,7 +14,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple
     npm install --save simple-dijs
 ```
 
-- from github releases (soon) https://github.com/avighier/simple-dijs/releases/latest (downloads)
+- from github releases https://github.com/avighier/simple-dijs/releases/latest (downloads)
 
 ## Integration
 
@@ -103,6 +103,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple
 
 - A complete build is configured. Always green before release
 - Tests are written before code (TDD) : The what before the how
+- Uses the http://semver.org/ versionning
 - Please **report issues** and suggestions https://github.com/avighier/simple-dijs/issues
 - Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/avighier/simple-dijs.svg?style=social&label=Watch)](https://github.com/avighier/simple-dijs)
 - Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/avighier/simple-dijs.svg?style=social&label=Star)](https://github.com/avighier/simple-dijs)
