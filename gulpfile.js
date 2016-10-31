@@ -209,7 +209,7 @@ var tmpPackage = function () {
     })
 };
 
-gulp.task('check-package', [/*'build'*/], function (cb) {
+gulp.task('check-package', ['build'], function (cb) {
     tmpPackage()
         .then(function (directory) {
 
@@ -242,8 +242,15 @@ gulp.task('check-package', [/*'build'*/], function (cb) {
         .catch(cb);
 });
 
-gulp.task('_publish-npm', ['check-package'], function () {
+gulp.task('_publish-npm', ['check-package'], function (cb) {
+    exec('npm publish', function (error, stdout, stderr) {
+        if (error) {
+            gutil.log(stderr);
+            return cb(error);            
+        }
 
+        gutil.log('>> ' + stdout);
+    });
 });
 
 gulp.task('_publish_github', ['check-package'], function (cb) {
@@ -262,7 +269,7 @@ gulp.task('_publish_github', ['check-package'], function (cb) {
                     return cb(error);
                 }
 
-                gutil.log('Ready to github publish release with package ' + destTar);
+                gutil.log('>> Ready to github publish release with package ' + destTar);
 
                 exec('7z a -tzip ' + destZip + ' *', {cwd: directory}, function (error, stdout, stderr) {
                     if (error) {
@@ -270,7 +277,7 @@ gulp.task('_publish_github', ['check-package'], function (cb) {
                         return cb(error);
                     }
 
-                    gutil.log('Ready to github publish release with package ' + destZip);
+                    gutil.log('>> Ready to github publish release with package ' + destZip);
 
                     cb();
 
