@@ -150,7 +150,7 @@ Di.prototype = {
     },
     _hasCallbackArg: function (func) {
         return func.toString()
-                    .match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1]
+                    .match(/^function\s*[^(]*\(\s*([^)]*)\)/m)[1]
                     .split(',')
                     .length >= 2;
     },
