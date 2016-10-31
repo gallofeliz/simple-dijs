@@ -165,7 +165,14 @@ gulp.task('build-minify', ['build-dist'], function () {
         .pipe(gulp.dest('dist'));
 });
 
+var alreadyCreatedTmpPackage = null;
+
 var tmpPackage = function () {
+
+    if (alreadyCreatedTmpPackage) {
+        return Promise.resolve(alreadyCreatedTmpPackage);
+    }
+
     return new Promise(function (resolve, reject) {
         exec('npm pack', function (error, stdout, stderr) {
 
@@ -189,6 +196,7 @@ var tmpPackage = function () {
                         return reject(error);
                     }
 
+                    alreadyCreatedTmpPackage = tmpDir;
                     resolve(tmpDir);
 
                     process.on('exit', function () {
@@ -201,7 +209,7 @@ var tmpPackage = function () {
     })
 };
 
-gulp.task('check-package', function (cb) {
+gulp.task('check-package', [/*'build'*/], function (cb) {
     tmpPackage()
         .then(function (directory) {
 
@@ -238,6 +246,37 @@ gulp.task('_publish-npm', ['check-package'], function () {
 
 });
 
-gulp.task('_publish_github', ['check-package'], function () {
+gulp.task('_publish_github', ['check-package'], function (cb) {
+    tmpPackage()
+        .then(function (directory) {
+            var packageJson = require('./package.json');
 
+            var destSuffix = path.join(process.cwd(), packageJson.name + '-' + packageJson.version);
+            var destTar = destSuffix + '.tar.gz';
+            var destZip = destSuffix + '.zip';
+
+            exec('tar --force-local -zcf ' + destTar + ' *' , {cwd: directory}, function (error, stdout, stderr) {
+
+                if (error) {
+                    gutil.log(stderr);
+                    return cb(error);
+                }
+
+                gutil.log('Ready to github publish release with package ' + destTar);
+
+                exec('7z a -tzip ' + destZip + ' *', {cwd: directory}, function (error, stdout, stderr) {
+                    if (error) {
+                        gutil.log(stderr);
+                        return cb(error);
+                    }
+
+                    gutil.log('Ready to github publish release with package ' + destZip);
+
+                    cb();
+
+                });
+
+            });
+        })
+        .catch(cb);
 });
