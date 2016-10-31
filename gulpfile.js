@@ -10,7 +10,6 @@ var rename = require('gulp-rename');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var fs = require('fs');
 var path = require('path');
-var npmTestInstall = require('npm-test-install');
 var through = require('through2');
 var replace = require('gulp-replace');
 var exec = require('child_process').exec;
@@ -186,27 +185,36 @@ var tmpPackage = function () {
             tmp.dir(function (err, tmpDir) {
                 if (err) {
                     fs.unlink(filename);
-                    return reject(err);
+                    return void reject(err);
                 }
 
-                exec('tar --strip-components=1 -xzf ' + filename.replace(/\\/g, '\\\\') + ' -C ' + tmpDir.replace(/\\/g, '\\\\'), function (error, stdout, stderr) {
+                var cmd = [
+                    'tar',
+                    '--strip-components=1',
+                    '-xzf',
+                    filename.replace(/\\/g, '\\\\'),
+                    '-C',
+                    tmpDir.replace(/\\/g, '\\\\')
+                ].join(' ');
+
+                exec(cmd, function (error, stdout, stderr) {
                     fs.unlink(filename);
                     if (error || stderr) {
                         gutil.log(stderr);
-                        return reject(error);
+                        return void reject(error);
                     }
 
                     alreadyCreatedTmpPackage = tmpDir;
                     resolve(tmpDir);
 
                     process.on('exit', function () {
-                        del.sync([tmpDir], {force:true});
+                        del.sync([tmpDir], {force: true});
                     });
-                })
+                });
 
             });
         });
-    })
+    });
 };
 
 gulp.task('check-package', ['build'], function (cb) {
@@ -216,7 +224,7 @@ gulp.task('check-package', ['build'], function (cb) {
             glob('**', {cwd: directory, nodir: true, dot: true}, function (err, files) {
 
                 if (err) {
-                    return reject(err);
+                    return cb(err);
                 }
 
                 var packageEntry = require('./package.json').main;
@@ -225,12 +233,19 @@ gulp.task('check-package', ['build'], function (cb) {
                     'dist/di.min.js',
                     'package.json',
                     'README.md',
-                    'README.hbs' // @see https://docs.npmjs.com/misc/developers : never ignored "README (and its variants)"
-                ];
+                    // @see https://docs.npmjs.com/misc/developers : never ignored "README (and its variants)"
+                    'README.hbs'
+                ].sort();
+
+                files = files.sort();
 
                 try {
-                    assert.deepStrictEqual(packageExpectation.sort(), files.sort(), 'Expected ' + packageExpectation.sort().join(', ') + ' Given ' + files.sort().join(', '));
-                    assert(files.includes(packageEntry))
+                    assert.deepStrictEqual(
+                        packageExpectation,
+                        files,
+                        'Expected ' + packageExpectation.join(', ') + ' Given ' + files.join(', ')
+                    );
+                    assert(files.includes(packageEntry));
                     cb();
                 } catch (e) {
                     cb(e);
@@ -246,7 +261,7 @@ gulp.task('_publish-npm', ['check-package'], function (cb) {
     exec('npm publish', function (error, stdout, stderr) {
         if (error) {
             gutil.log(stderr);
-            return cb(error);            
+            return cb(error);
         }
 
         gutil.log('>> ' + stdout);
@@ -262,7 +277,7 @@ gulp.task('_publish_github', ['check-package'], function (cb) {
             var destTar = destSuffix + '.tar.gz';
             var destZip = destSuffix + '.zip';
 
-            exec('tar --force-local -zcf ' + destTar + ' *' , {cwd: directory}, function (error, stdout, stderr) {
+            exec('tar --force-local -zcf ' + destTar + ' *', {cwd: directory}, function (error, stdout, stderr) {
 
                 if (error) {
                     gutil.log(stderr);
