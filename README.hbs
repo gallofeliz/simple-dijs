@@ -1,6 +1,6 @@
 # SIMPLE-DIJS
 
-Simple Javascript Dependency Injection Container (DI) like Pimple
+Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
 
 [![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
 [![npm](https://img.shields.io/github/issues-raw/avighier/simple-dijs/bug.svg?label=bugs)](https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
@@ -23,12 +23,15 @@ Simple Javascript Dependency Injection Container (DI) like Pimple
     var Di = require('simple-dijs');
     // Web (just an example)
     ln -s node_modules/simple-dijs/dist/di.js public/lib/di.js
+    // And minified : Only 4 K !
+    ln -s node_modules/simple-dijs/dist/di.min.js public/lib/di.min.js
 ```
 
 ```html
     <!-- Available global or ADM (requirejs), thanks to Browserify -->
-    <!-- Exists di.min.js -->
     <script src="lib/di.js" type="text/javascript"></script>
+    <!-- Exists di.min.js -->
+    <script src="lib/di.min.js" type="text/javascript"></script>
 ```
 
 ## Examples to use
