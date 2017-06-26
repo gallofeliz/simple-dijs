@@ -410,5 +410,3 @@ di.set('config', function (di, callback) {
 
 -
 
-
-[![](https://piwik.avighier.fr/piwik.php?idsite=2&rec=1)]()
