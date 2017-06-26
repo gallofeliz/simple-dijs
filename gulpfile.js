@@ -10,18 +10,22 @@ var rename = require('gulp-rename');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var fs = require('fs');
 var path = require('path');
-var npmTestInstall = require('npm-test-install');
 var through = require('through2');
 var replace = require('gulp-replace');
 var exec = require('child_process').exec;
 var gutil = require('gulp-util');
 var jsinspect = require('gulp-jsinspect');
+var tmp = require('tmp');
+var glob = require('glob');
+var assert = require('assert');
 
 gulp.task('default', ['build']);
-// Build is checking and then building dist files : di.js and di.min.js and finally check all is packaged
-gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme', 'test-npm-package']);
+// Build is checking and then building dist files : di.js and di.min.js
+gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
 gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test', 'npm-check']);
+// Checking package content, publish on NPM and building ZIP to publish on Github
+gulp.task('publish', ['build', 'check-package', '_publish-npm', '_publish_github']);
 
 gulp.task('lint', function () {
     var eslint = require('gulp-eslint');
@@ -160,36 +164,141 @@ gulp.task('build-minify', ['build-dist'], function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('test-npm-package', ['build-dist', 'build-minify'], function (cb) {
+var alreadyCreatedTmpPackage = null;
 
-    npmTestInstall('simple-dijs', __dirname, true).then(function (install) {
-        var mainFile = require('./package.json').main,
-            miniFile = mainFile.replace(/\.js$/, '.min.js');
+var tmpPackage = function () {
 
-        var missingFiles = [ mainFile, miniFile ].filter(function (filename) {
-            try {
-                fs.accessSync(path.join(install.getPackageDir(), filename));
-                return false;
-            } catch (e) {
-                return true;
+    if (alreadyCreatedTmpPackage) {
+        return Promise.resolve(alreadyCreatedTmpPackage);
+    }
+
+    return new Promise(function (resolve, reject) {
+        exec('npm pack', function (error, stdout, stderr) {
+
+            if (error || stderr !== '') {
+                gutil.log(stderr);
+                return reject(error);
             }
-        });
 
-        if (missingFiles.length > 0) {
-            install.free().then(function () {
-                cb('Missing files ' + missingFiles.join(', '));
-            }, function (e) {
-                console.warn(e);
-                cb('Missing files ' + missingFiles.join(', '));
+            var filename = stdout.trim();
+
+            tmp.dir(function (err, tmpDir) {
+                if (err) {
+                    fs.unlink(filename);
+                    return void reject(err);
+                }
+
+                var cmd = [
+                    'tar',
+                    '--strip-components=1',
+                    '-xzf',
+                    filename.replace(/\\/g, '\\\\'),
+                    '-C',
+                    tmpDir.replace(/\\/g, '\\\\')
+                ].join(' ');
+
+                exec(cmd, function (error, stdout, stderr) {
+                    fs.unlink(filename);
+                    if (error || stderr) {
+                        gutil.log(stderr);
+                        return void reject(error);
+                    }
+
+                    alreadyCreatedTmpPackage = tmpDir;
+                    resolve(tmpDir);
+
+                    process.on('exit', function () {
+                        del.sync([tmpDir], {force: true});
+                    });
+                });
+
             });
-            return;
+        });
+    });
+};
+
+gulp.task('check-package', ['build'], function (cb) {
+    tmpPackage()
+        .then(function (directory) {
+
+            glob('**', {cwd: directory, nodir: true, dot: true}, function (err, files) {
+
+                if (err) {
+                    return cb(err);
+                }
+
+                var packageEntry = require('./package.json').main;
+                var packageExpectation = [
+                    'dist/di.js',
+                    'dist/di.min.js',
+                    'package.json',
+                    'README.md',
+                    // @see https://docs.npmjs.com/misc/developers : never ignored "README (and its variants)"
+                    'README.hbs'
+                ].sort();
+
+                files = files.sort();
+
+                try {
+                    assert.deepStrictEqual(
+                        packageExpectation,
+                        files,
+                        'Expected ' + packageExpectation.join(', ') + ' Given ' + files.join(', ')
+                    );
+                    assert(files.includes(packageEntry));
+                    cb();
+                } catch (e) {
+                    cb(e);
+                }
+            });
+
+
+        })
+        .catch(cb);
+});
+
+gulp.task('_publish-npm', ['check-package'], function (cb) {
+    exec('npm publish', function (error, stdout, stderr) {
+        if (error) {
+            gutil.log(stderr);
+            return cb(error);
         }
 
-        console.log('No missing files');
-        install.free().then(cb, function (e) {
-            console.warn(e);
-            cb();
-        });
-    }, cb);
+        gutil.log('>> ' + stdout);
+    });
+});
 
+gulp.task('_publish_github', ['check-package'], function (cb) {
+    tmpPackage()
+        .then(function (directory) {
+            var packageJson = require('./package.json');
+
+            var destSuffix = path.join(process.cwd(), packageJson.name + '-' + packageJson.version);
+            var destTar = destSuffix + '.tar.gz';
+            var destZip = destSuffix + '.zip';
+
+            exec('tar --force-local -zcf ' + destTar + ' *', {cwd: directory}, function (error, stdout, stderr) {
+
+                if (error) {
+                    gutil.log(stderr);
+                    return cb(error);
+                }
+
+                gutil.log('>> Ready to github publish release with package ' + destTar);
+
+                exec('7z a -tzip ' + destZip + ' *', {cwd: directory}, function (error, stdout, stderr) {
+                    if (error) {
+                        gutil.log(stderr);
+                        return cb(error);
+                    }
+
+                    gutil.log('>> Ready to github publish release with package ' + destZip);
+
+                    cb();
+
+                });
+
+            });
+        })
+        .catch(cb);
 });

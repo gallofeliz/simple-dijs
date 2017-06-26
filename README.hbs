@@ -1,6 +1,12 @@
 # SIMPLE-DIJS
 
-## Install
+Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
+
+[![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+[![npm](https://img.shields.io/github/issues-raw/avighier/simple-dijs/bug.svg?label=bugs)](https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![npm](https://img.shields.io/npm/dm/simple-dijs.svg)](http://www.npm-stats.com/~packages/simple-dijs)
+
+## Installation
 
 - You can install from NPM
 
@@ -8,7 +14,7 @@
     npm install --save simple-dijs
 ```
 
-- from github releases (soon) https://github.com/avighier/simple-dijs/releases/latest (downloads)
+- from github releases https://github.com/avighier/simple-dijs/releases/latest (downloads)
 
 ## Integration
 
@@ -17,12 +23,15 @@
     var Di = require('simple-dijs');
     // Web (just an example)
     ln -s node_modules/simple-dijs/dist/di.js public/lib/di.js
+    // And minified : Only 4 K !
+    ln -s node_modules/simple-dijs/dist/di.min.js public/lib/di.min.js
 ```
 
 ```html
     <!-- Available global or ADM (requirejs), thanks to Browserify -->
-    <!-- Exists di.min.js -->
     <script src="lib/di.js" type="text/javascript"></script>
+    <!-- Exists di.min.js -->
+    <script src="lib/di.min.js" type="text/javascript"></script>
 ```
 
 ## Examples to use
@@ -93,13 +102,14 @@
     (new Di()).set(...).set(...);
 ```
 
-## Quality
+## Quality and license
 
-- A complete build is configured. Always green before release : [![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+- A complete build is configured. Always green before release
 - Tests are written before code (TDD) : The what before the how
-- Please report issues and suggestions
+- Uses the http://semver.org/ versionning
+- Please **report issues** and suggestions https://github.com/avighier/simple-dijs/issues
+- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/avighier/simple-dijs.svg?style=social&label=Watch)](https://github.com/avighier/simple-dijs)
+- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/avighier/simple-dijs.svg?style=social&label=Star)](https://github.com/avighier/simple-dijs)
 
 ## API Reference
 {{>main}}
-
-[![](https://piwik.avighier.fr/piwik.php?idsite=2&rec=1)]()

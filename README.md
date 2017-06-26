@@ -1,6 +1,12 @@
 # SIMPLE-DIJS
 
-## Install
+Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
+
+[![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+[![npm](https://img.shields.io/github/issues-raw/avighier/simple-dijs/bug.svg?label=bugs)](https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![npm](https://img.shields.io/npm/dm/simple-dijs.svg)](http://www.npm-stats.com/~packages/simple-dijs)
+
+## Installation
 
 - You can install from NPM
 
@@ -8,7 +14,7 @@
     npm install --save simple-dijs
 ```
 
-- from github releases (soon) https://github.com/avighier/simple-dijs/releases/latest (downloads)
+- from github releases https://github.com/avighier/simple-dijs/releases/latest (downloads)
 
 ## Integration
 
@@ -17,12 +23,15 @@
     var Di = require('simple-dijs');
     // Web (just an example)
     ln -s node_modules/simple-dijs/dist/di.js public/lib/di.js
+    // And minified : Only 4 K !
+    ln -s node_modules/simple-dijs/dist/di.min.js public/lib/di.min.js
 ```
 
 ```html
     <!-- Available global or ADM (requirejs), thanks to Browserify -->
-    <!-- Exists di.min.js -->
     <script src="lib/di.js" type="text/javascript"></script>
+    <!-- Exists di.min.js -->
+    <script src="lib/di.min.js" type="text/javascript"></script>
 ```
 
 ## Examples to use
@@ -93,11 +102,14 @@
     (new Di()).set(...).set(...);
 ```
 
-## Quality
+## Quality and license
 
-- A complete build is configured. Always green before release : [![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
+- A complete build is configured. Always green before release
 - Tests are written before code (TDD) : The what before the how
-- Please report issues and suggestions
+- Uses the http://semver.org/ versionning
+- Please **report issues** and suggestions https://github.com/avighier/simple-dijs/issues
+- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/avighier/simple-dijs.svg?style=social&label=Watch)](https://github.com/avighier/simple-dijs)
+- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/avighier/simple-dijs.svg?style=social&label=Star)](https://github.com/avighier/simple-dijs)
 
 ## API Reference
 <a name="Di"></a>
@@ -137,7 +149,10 @@ var di = new Di()
 ```
 **Example**  
 ```js
-var di = new Di({  id1: value1,  id2: value2})
+var di = new Di({
+  id1: value1,
+  id2: value2
+})
 ```
 
 -
@@ -160,7 +175,10 @@ Multiple set values
 
 **Example**  
 ```js
-di.batchset({   id1: value1,   id2: value2})
+di.batchset({
+   id1: value1,
+   id2: value2
+})
 ```
 
 -
@@ -185,7 +203,9 @@ Create a factory function
 
 **Example**  
 ```js
-di.set('token', di.factory(function () {  return new Token();}))
+di.set('token', di.factory(function () {
+  return new Token();
+}))
 ```
 
 -
@@ -211,7 +231,12 @@ Get a value asynchronously with callback (registered with callback)
 
 **Example**  
 ```js
-di.get('database', function (err, database) {   if (err) {       // ...   }   database.find(userId);})
+di.get('database', function (err, database) {
+   if (err) {
+       // ...
+   }
+   database.find(userId);
+})
 ```
 
 -
@@ -290,7 +315,9 @@ Protect a function to store as raw
 
 **Example**  
 ```js
-di.set('math.add', di.protect(function (a, b) {  return a + b;}))
+di.set('math.add', di.protect(function (a, b) {
+  return a + b;
+}))
 ```
 
 -
@@ -331,7 +358,12 @@ di.remove('database')
 <a name="Di+set"></a>
 
 #### di.set(id, funcOrValue) ⇒ <code>[Di](#Di)</code>
-Set a value in the container. The registered value is by default the returned value.In case you use a function to factory your value :   - you can use the first injected argument that is the current Di instance.   - you can register your value (for example for asynchronous) by declaring andcalling the second possible argument "callback", as a normal node callback.
+Set a value in the container. The registered value is by default the returned value.
+
+In case you use a function to factory your value :
+   - you can use the first injected argument that is the current Di instance.
+   - you can register your value (for example for asynchronous) by declaring and
+calling the second possible argument "callback", as a normal node callback.
 
 **Kind**: instance method of <code>[Di](#Di)</code>  
 **Summary**: Set a value in the container, synchronously or asynchronously  
@@ -378,5 +410,3 @@ di.set('config', function (di, callback) {
 
 -
 
-
-[![](https://piwik.avighier.fr/piwik.php?idsite=2&rec=1)]()
