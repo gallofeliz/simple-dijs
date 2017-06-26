@@ -149,7 +149,10 @@ var di = new Di()
 ```
 **Example**  
 ```js
-var di = new Di({  id1: value1,  id2: value2})
+var di = new Di({
+  id1: value1,
+  id2: value2
+})
 ```
 
 -
@@ -172,7 +175,10 @@ Multiple set values
 
 **Example**  
 ```js
-di.batchset({   id1: value1,   id2: value2})
+di.batchset({
+   id1: value1,
+   id2: value2
+})
 ```
 
 -
@@ -197,7 +203,9 @@ Create a factory function
 
 **Example**  
 ```js
-di.set('token', di.factory(function () {  return new Token();}))
+di.set('token', di.factory(function () {
+  return new Token();
+}))
 ```
 
 -
@@ -223,7 +231,12 @@ Get a value asynchronously with callback (registered with callback)
 
 **Example**  
 ```js
-di.get('database', function (err, database) {   if (err) {       // ...   }   database.find(userId);})
+di.get('database', function (err, database) {
+   if (err) {
+       // ...
+   }
+   database.find(userId);
+})
 ```
 
 -
@@ -302,7 +315,9 @@ Protect a function to store as raw
 
 **Example**  
 ```js
-di.set('math.add', di.protect(function (a, b) {  return a + b;}))
+di.set('math.add', di.protect(function (a, b) {
+  return a + b;
+}))
 ```
 
 -
@@ -343,7 +358,12 @@ di.remove('database')
 <a name="Di+set"></a>
 
 #### di.set(id, funcOrValue) ⇒ <code>[Di](#Di)</code>
-Set a value in the container. The registered value is by default the returned value.In case you use a function to factory your value :   - you can use the first injected argument that is the current Di instance.   - you can register your value (for example for asynchronous) by declaring andcalling the second possible argument "callback", as a normal node callback.
+Set a value in the container. The registered value is by default the returned value.
+
+In case you use a function to factory your value :
+   - you can use the first injected argument that is the current Di instance.
+   - you can register your value (for example for asynchronous) by declaring and
+calling the second possible argument "callback", as a normal node callback.
 
 **Kind**: instance method of <code>[Di](#Di)</code>  
 **Summary**: Set a value in the container, synchronously or asynchronously  
