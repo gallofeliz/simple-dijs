@@ -149,10 +149,12 @@ Di.prototype = {
         return this;
     },
     _hasCallbackArg: function (func) {
-        return func.toString()
-                    .match(/^function\s*[^(]*\(\s*([^)]*)\)/m)[1]
-                    .split(',')
-                    .length >= 2;
+
+        var funcStr = func.toString(),
+            match = funcStr.match(/^function\s*[^(]*\(\s*([^)]*)\)/m) || funcStr.match(/^\(?\s*([^)=]*)\)?\s*=/m);
+
+        return match[1].split(',').length >= 2;
+
     },
     /**
         Get a value synchronously
