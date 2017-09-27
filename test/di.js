@@ -96,6 +96,32 @@ describe('Di', function () {
             assert.strictEqual(returned, di);
         });
 
+        try {
+
+            // Test ES6 functions
+
+            eval(
+                'it("Call (normal) sync ES6 function 1", function () {' +
+                '    var returned = di.set("myId", injectedDi => {' +
+                '        assert.strictEqual(injectedDi, di);' +
+                '        return "something";' +
+                '    });' +
+                '' +
+                '    assert.strictEqual(di.get("myId"), "something");' +
+                '    assert.strictEqual(returned, di);' +
+                '});' +
+                '' +
+                'it("Call (normal) sync ES6 function 2", function () {' +
+                '    var returned = di.set("myId", (injectedDi) => "something");' +
+                '' +
+                '    assert.strictEqual(di.get("myId"), "something");' +
+                '    assert.strictEqual(returned, di);' +
+                '});'
+            );
+
+        } catch (e) {
+        }
+
         it('Call (normal) async callback resolving function', function (cb) {
             var returned = di.set('myId', function (injectedDi, callback) {
                 assert.strictEqual(injectedDi, di);
