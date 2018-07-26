@@ -1,6 +1,8 @@
 # SIMPLE-DIJS
 
-Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
+Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - ES6 Arrow Functions compatible
+
+NOTE : this is V2. The V2 doesn't support callback anymore and can broke compatibity with old node versions in the future. Please use the v1 if you need to use callbacks or old node version.
 
 [![Build Status](https://travis-ci.org/gallofeliz/simple-dijs.svg?branch=master)](https://travis-ci.org/gallofeliz/simple-dijs)
 [![npm](https://img.shields.io/github/issues-raw/gallofeliz/simple-dijs/bug.svg?label=bugs)](https://github.com/gallofeliz/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
@@ -78,15 +80,17 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
         return a + b;
     }));
 
-    // You can use callbacks (node-style)
+    // New feature in v2 ! You can inject your dependencies in arguments
 
-    di.set('database', function (di, callback) {
-        dbConnect(url, callback);
+    di.set('database', function (config, logger) { // You have declared config and logger
+        return new Database(config.database, logger);
     });
 
-    di.get('database', function (err, database) {
-        database.use('users').query(...);
-    });
+    // Or with ES6 Arrow Functions
+
+    di.set('database', (config, logger) => new Database(config.database, logger) });
+
+    // You cannot use callbacks anymore. Please see version 1.x
 
     // You can use promise (native or not)
 
@@ -115,7 +119,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
 <a name="Di"></a>
 
 ### Di
-**Kind**: global class
+**Kind**: global class  
 
 * [Di](#Di)
     * [new Di([values])](#new_Di_new)
@@ -143,11 +147,11 @@ Create a new Container
 | --- | --- | --- |
 | [values] | <code>Object.&lt;string, \*&gt;</code> | Values to set on construction (eqiv batchSet [batchSet](#Di+batchSet)) |
 
-**Example**
+**Example**  
 ```js
 var di = new Di()
 ```
-**Example**
+**Example**  
 ```js
 var di = new Di({
   id1: value1,
@@ -162,8 +166,8 @@ var di = new Di({
 #### di.batchSet(values) ⇒ <code>[Di](#Di)</code>
 Multiple set values
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>[Di](#Di)</code> - himself
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>[Di](#Di)</code> - himself  
 **Throws**:
 
 - <code>Error</code> If values is not provided or not Object
@@ -173,7 +177,7 @@ Multiple set values
 | --- | --- | --- |
 | values | <code>Object.&lt;string, \*&gt;</code> | Values to set |
 
-**Example**
+**Example**  
 ```js
 di.batchset({
    id1: value1,
@@ -188,20 +192,20 @@ di.batchset({
 #### di.factory(func) ⇒ <code>function</code>
 Create a factory function
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>function</code> - The same function
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>function</code> - The same function  
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
 - <code>Error</code> Protected function
 
-**See**: Di#set
+**See**: Di#set  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | func | <code>function</code> | The function to factory |
 
-**Example**
+**Example**  
 ```js
 di.set('token', di.factory(function () {
   return new Token();
@@ -215,7 +219,7 @@ di.set('token', di.factory(function () {
 #### di.get(id, callback) ⇒ <code>undefined</code>
 Get a value asynchronously with callback (registered with callback)
 
-**Kind**: instance method of <code>[Di](#Di)</code>
+**Kind**: instance method of <code>[Di](#Di)</code>  
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
@@ -229,7 +233,7 @@ Get a value asynchronously with callback (registered with callback)
 | id | <code>string</code> | The value id |
 | callback | <code>function</code> | The callback |
 
-**Example**
+**Example**  
 ```js
 di.get('database', function (err, database) {
    if (err) {
@@ -246,8 +250,8 @@ di.get('database', function (err, database) {
 #### di.get(id) ⇒ <code>\*</code>
 Get a value synchronously
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>\*</code> - The value
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>\*</code> - The value  
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
@@ -259,7 +263,7 @@ Get a value synchronously
 | --- | --- | --- |
 | id | <code>string</code> | The value id |
 
-**Example**
+**Example**  
 ```js
 di.get('database').find(userId)
 ```
@@ -271,14 +275,14 @@ di.get('database').find(userId)
 #### di.has(id) ⇒ <code>boolean</code>
 Check that the container owns the provided id
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>boolean</code> - If id is owned by the container
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>boolean</code> - If id is owned by the container  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | id | <code>string</code> | Id to check |
 
-**Example**
+**Example**  
 ```js
 di.has('database') || di.set('database', ...)
 ```
@@ -290,8 +294,8 @@ di.has('database') || di.set('database', ...)
 #### di.keys() ⇒ <code>Array.&lt;string&gt;</code>
 Get all the ids
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>Array.&lt;string&gt;</code> - the ids
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>Array.&lt;string&gt;</code> - the ids  
 
 -
 
@@ -300,20 +304,20 @@ Get all the ids
 #### di.protect(func) ⇒ <code>function</code>
 Protect a function to store as raw
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>function</code> - The same function
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>function</code> - The same function  
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
 - <code>Error</code> Factory function
 
-**See**: Di#set
+**See**: Di#set  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | func | <code>function</code> | The function to factory |
 
-**Example**
+**Example**  
 ```js
 di.set('math.add', di.protect(function (a, b) {
   return a + b;
@@ -327,7 +331,7 @@ di.set('math.add', di.protect(function (a, b) {
 #### ~~di.register()~~
 ***Deprecated***
 
-**Kind**: instance method of <code>[Di](#Di)</code>
+**Kind**: instance method of <code>[Di](#Di)</code>  
 
 -
 
@@ -336,8 +340,8 @@ di.set('math.add', di.protect(function (a, b) {
 #### di.remove(id) ⇒ <code>[Di](#Di)</code>
 Remove a value
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Returns**: <code>[Di](#Di)</code> - himself
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Returns**: <code>[Di](#Di)</code> - himself  
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
@@ -348,7 +352,7 @@ Remove a value
 | --- | --- | --- |
 | id | <code>string</code> | The value id |
 
-**Example**
+**Example**  
 ```js
 di.remove('database')
 ```
@@ -365,9 +369,9 @@ In case you use a function to factory your value :
    - you can register your value (for example for asynchronous) by declaring and
 calling the second possible argument "callback", as a normal node callback.
 
-**Kind**: instance method of <code>[Di](#Di)</code>
-**Summary**: Set a value in the container, synchronously or asynchronously
-**Returns**: <code>[Di](#Di)</code> - himself
+**Kind**: instance method of <code>[Di](#Di)</code>  
+**Summary**: Set a value in the container, synchronously or asynchronously  
+**Returns**: <code>[Di](#Di)</code> - himself  
 **Throws**:
 
 - <code>Error</code> if missing or incorrect arguments
@@ -379,29 +383,29 @@ calling the second possible argument "callback", as a normal node callback.
 | id | <code>string</code> | The id of value |
 | funcOrValue | <code>\*</code> | The value |
 
-**Example** *(Set a raw value)*
+**Example** *(Set a raw value)*  
 ```js
 di.set('color', '#ff0000')
 ```
-**Example** *(Set a building function (value with be cached after first call))*
+**Example** *(Set a building function (value with be cached after first call))*  
 ```js
 di.set('database', function (di) {
   return new Database(di.get('database_url'));
 })
 ```
-**Example** *(Set a factory function (value will be factoryed each call))*
+**Example** *(Set a factory function (value will be factoryed each call))*  
 ```js
 di.set('token', di.factory(function () {
   return new Token();
 }))
 ```
-**Example** *(Set a building function that returns a promise)*
+**Example** *(Set a building function that returns a promise)*  
 ```js
 di.set('config', function () {
   return fsPromise.readFile('config.json');
 })
 ```
-**Example** *(Set a building function that use callback for async)*
+**Example** *(Set a building function that use callback for async)*  
 ```js
 di.set('config', function (di, callback) {
   fs.readFile('config.json', callback);

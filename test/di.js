@@ -122,36 +122,6 @@ describe('Di', function () {
         } catch (e) {
         }
 
-        it('Call (normal) async callback resolving function', function (cb) {
-            var returned = di.set('myId', function (injectedDi, callback) {
-                assert.strictEqual(injectedDi, di);
-                callback(null, 'something');
-            });
-
-            assert.strictEqual(returned, di);
-            di.get('myId', function (err, value) {
-                assert.strictEqual(err, null);
-                assert.strictEqual(value, 'something');
-                cb();
-            });
-        });
-
-        it('Call (normal) async callback rejecting function', function (cb) {
-            var error = new Error('Error connection database');
-
-            var returned = di.set('myId', function (injectedDi, callback) {
-                assert.strictEqual(injectedDi, di);
-                callback(error);
-            });
-
-            assert.strictEqual(returned, di);
-            di.get('myId', function (err, value) {
-                assert.strictEqual(arguments.length, 1);
-                assert.strictEqual(err, error);
-                cb();
-            });
-        });
-
     });
 
     it('#register alias of #set', function () {
@@ -234,133 +204,81 @@ describe('Di', function () {
             assert(returnDi, di);
         });
 
-        it('Call with existing id having sync function, with callback', function () {
-            var returnDi = di.set('myId', function (di) {
-                return 'something';
-            });
+        it('Call with parameters for injection', function () {
+            const myIdValue = ['something'];
 
-            assert(returnDi, di);
-
-            try {
-                di.get('myId', function () {});
-                assert.fail('Expected error');
-            } catch (e) {
-                assert.equal(e.message, 'Unexpected callback with no-callback registered value');
-            }
-        });
-
-        it('Call with existing id having async function, without callback', function () {
-            var returnDi = di.set('myId', function (di, callback) {
-                callback(null, 'something');
-            });
-
-            assert(returnDi, di);
-
-            try {
-                di.get('myId');
-                assert.fail('Expected error');
-            } catch (e) {
-                assert.equal(e.message, 'Expected callback function with callback registered value');
-            }
-        });
-
-        it('Call with existing id with invalid callback', function () {
-            var returnDi = di.set('myId', function (di, callback) {
-                callback(null, 'something');
-            });
-
-            assert(returnDi, di);
-
-            try {
-                di.get('myId', null);
-                assert.fail('Expected error');
-            } catch (e) {
-                assert.equal(e.message, 'Expected callback function with callback registered value');
-            }
-        });
-
-        it('Call with existing id having async callback resolving function', function (cb) {
-            var callbackValue = ['something'],
-                calledCount = 0;
-
-            var returnDi = di.set('myId', function (injectedDi, callback) {
+            di.set('myId', function (injectedDi) {
                 assert.strictEqual(injectedDi, di);
-                assert(callback instanceof Function);
-                assert.equal(++calledCount, 1);
-                process.nextTick(function () {
-                    callback(null, callbackValue);
-                });
+                return myIdValue;
             });
 
+            const _di = di;
+
+            var returnDi = di.set('myId2', function (myId, di) {
+                assert.strictEqual(di, _di);
+                assert.strictEqual(myId, myIdValue);
+                return { foo: myId };
+            });
+
+            var firstCall = di.get('myId2');
+            var secondCall = di.get('myId2');
+            assert.strictEqual(firstCall, secondCall);
+            assert.deepEqual(firstCall, { foo: myIdValue });
             assert(returnDi, di);
-
-            var controlsCount = 0,
-                cbOnFinish = function () {
-                    if (++controlsCount === 2) {
-                        process.nextTick(function () {
-                            cb();
-                        });
-                    }
-                };
-
-            var call = di.get('myId', function (err, value) {
-                assert.strictEqual(err, null);
-                assert.strictEqual(value, callbackValue);
-
-                di.get('myId', function (err, value) {
-                    assert.strictEqual(err, null);
-                    assert.strictEqual(value, callbackValue);
-                    cbOnFinish();
-                });
-            });
-
-            di.get('myId', function (err, value) {
-                assert.strictEqual(err, null);
-                assert.strictEqual(value, callbackValue);
-                cbOnFinish();
-            });
-
-            assert(call === undefined);
         });
 
-        it('Call with existing id having async callback rejecting function', function (cb) {
-            var callbackError = new Error('Unable to connect to database'),
-                calledCount = 0;
-
-            var returnDi = di.set('myId', function (injectedDi, callback) {
+        it('Call with bad parameters for injection', function () {
+            di.set('myId', function (injectedDi) {
                 assert.strictEqual(injectedDi, di);
-                assert(callback instanceof Function);
-                assert.equal(++calledCount, 1);
-                process.nextTick(function () {
-                    callback(callbackError);
-                });
+                return 33;
             });
 
-            assert(returnDi, di);
-
-            var controlsCount = 0,
-                cbOnFinish = function () {
-                    if (++controlsCount === 2) {
-                        process.nextTick(function () {
-                            cb();
-                        });
-                    }
-                };
-
-            var call = di.get('myId', function (err, value) {
-                assert.strictEqual(arguments.length, 1);
-                assert.strictEqual(err, callbackError);
-                cbOnFinish();
+            di.set('myId2', function (myId, database) {
+                // Nothing to check
             });
 
-            di.get('myId', function (err, value) {
-                assert.strictEqual(arguments.length, 1);
-                assert.strictEqual(err, callbackError);
-                cbOnFinish();
-            });
 
-            assert(call === undefined);
+            try {
+                di.get('myId2');
+                assert.fail('Expected error');
+            } catch (e) {
+                assert(e instanceof Error);
+                assert.strictEqual(e.message, 'Identifier "database" is not defined');
+            }
         });
+
+        try {
+
+            // Test ES6 functions
+
+            eval(
+                'it("Call (normal) sync ES6 function 1", function () {' +
+                '    di.set("myId", injectedDi => {' +
+                '        assert.strictEqual(injectedDi, di);' +
+                '        return "something";' +
+                '    });' +
+                '    var _di = di; ' +
+                '    var returned = di.set("myId2", (myId, di) => {' +
+                '        assert.strictEqual(di, _di);' +
+                '        assert.strictEqual(myId, "something");' +
+                '        return "I want " + myId;' +
+                '    });' +
+                '' +
+                '    assert.strictEqual(di.get("myId2"), "I want something");' +
+                '    assert.strictEqual(returned, di);' +
+                '});' +
+                '' +
+                'it("Call (normal) sync ES6 function 2", function () {' +
+                '    di.set("myId", (injectedDi) => "something");' +
+                '    var returned = di.set("myId2", (myId, di) => "I look at " + myId);' +
+                '' +
+                '    assert.strictEqual(di.get("myId2"), "I look at something");' +
+                '    assert.strictEqual(returned, di);' +
+                '});'
+            );
+
+        } catch (e) {
+        }
 
     });
 
@@ -369,7 +287,7 @@ describe('Di', function () {
         it('Call (normal)', function () {
             di.set('one', 1);
             di.set('two', function () { return 2; });
-            assert.deepEqual(di.keys().sort(), ['trap', 'one', 'two'].sort());
+            assert.deepEqual(di.keys().sort(), ['di', 'trap', 'one', 'two'].sort());
         });
 
     });
@@ -476,44 +394,6 @@ describe('Di', function () {
             assert.notEqual(firstCall, secondCall);
         });
 
-        it('Call (normal) with async callback #set', function (cb) {
-            di.set('myId', di.factory(function (injectedDi, callback) {
-                assert.strictEqual(injectedDi, di);
-                assert(callback instanceof Function);
-                process.nextTick(function () {
-                    callback(null, ['something']);
-                });
-            }));
-
-            var callbackValues = [],
-                countCbWhenOk = 0;
-
-            var cbWhenOk = function () {
-                if (++countCbWhenOk === 2) {
-                    assert.equal(callbackValues.length, 2);
-                    assert.notEqual(callbackValues[0], callbackValues[1]);
-                    cb();
-                }
-            };
-
-            var firstCall = di.get('myId', function (e, value) {
-                assert.strictEqual(e, null);
-                assert.deepEqual(value, ['something']);
-                callbackValues.push(value);
-                cbWhenOk();
-            });
-
-            var secondCall = di.get('myId', function (e, value) {
-                assert.strictEqual(e, null);
-                assert.deepEqual(value, ['something']);
-                callbackValues.push(value);
-                cbWhenOk();
-            });
-
-            assert(firstCall === undefined);
-            assert(secondCall === undefined);
-        });
-
         it('Call (normal) queue with #set', function () {
             var factoryMyId = di.factory(function (injectedDi) {
                     assert.strictEqual(injectedDi, di);
@@ -540,61 +420,6 @@ describe('Di', function () {
             assert.notEqual(firstCallMyId2, secondCallMyId2);
         });
 
-    });
-
-    it('Integration test', function (cb) {
-
-        var dbConnect = function (url, callback) {
-            process.nextTick(function () {
-                callback(null, { connected: true });
-            });
-        };
-
-        di.set('database-url', 'mysql://127.0.0.1')
-        .set('database', function (injectedDi, callback) {
-            dbConnect(injectedDi.get('database-url'), callback);
-        })
-        .set('userCollection', function (injectedDi, callback) {
-            injectedDi.get('database', function () {
-                callback(null, {
-                    find: function (id) {
-                        return { name: 'Paul' };
-                    }
-                });
-            });
-        })
-        .set('userService', function (injectedDi) {
-            return {
-                getName: function (who) {
-                    return new Promise(function (resolve) {
-                        injectedDi.get('userCollection', function (e, userCollection) {
-                            resolve(userCollection.find(who).name);
-                        });
-                    });
-                }
-            };
-        });
-
-        var countCbWhenOk = 0,
-            cbOnFinish = function () {
-                if (++countCbWhenOk === 2) {
-                    cb();
-                }
-            };
-
-        if (typeof Promise === 'function') {
-            di.get('userService').getName(1).then(function (name) {
-                assert.strictEqual(name, 'Paul');
-                cbOnFinish();
-            });
-        } else {
-            cbOnFinish();
-        }
-
-        di.get('userCollection', function (e, userCollection) {
-            assert.strictEqual(userCollection.find(1).name, 'Paul');
-            cbOnFinish();
-        });
     });
 
 });

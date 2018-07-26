@@ -1,6 +1,8 @@
 # SIMPLE-DIJS
 
-Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
+Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - ES6 Arrow Functions compatible
+
+NOTE : this is V2. The V2 doesn't support callback anymore and can broke compatibity with old node versions in the future. Please use the v1 if you need to use callbacks or old node version.
 
 [![Build Status](https://travis-ci.org/gallofeliz/simple-dijs.svg?branch=master)](https://travis-ci.org/gallofeliz/simple-dijs)
 [![npm](https://img.shields.io/github/issues-raw/gallofeliz/simple-dijs/bug.svg?label=bugs)](https://github.com/gallofeliz/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
@@ -78,15 +80,17 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
         return a + b;
     }));
 
-    // You can use callbacks (node-style)
+    // New feature in v2 ! You can inject your dependencies in arguments
 
-    di.set('database', function (di, callback) {
-        dbConnect(url, callback);
+    di.set('database', function (config, logger) { // You have declared config and logger
+        return new Database(config.database, logger);
     });
 
-    di.get('database', function (err, database) {
-        database.use('users').query(...);
-    });
+    // Or with ES6 Arrow Functions
+
+    di.set('database', (config, logger) => new Database(config.database, logger) });
+
+    // You cannot use callbacks anymore. Please see version 1.x
 
     // You can use promise (native or not)
 
