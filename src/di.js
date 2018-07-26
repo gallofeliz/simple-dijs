@@ -16,6 +16,8 @@ var Di = function (values) {
     this._factory = [];
     this._protect = [];
 
+    this.set('di', this);
+
     if (values) {
         this.batchSet(values);
     }
@@ -113,7 +115,6 @@ Di.prototype = {
             *})
     */
     set: function (id, funcOrValue) {
-
         if (typeof id !== 'string') {
             throw new Error('Expected argument id type string');
         }
@@ -134,7 +135,7 @@ Di.prototype = {
                                 ? {
                                     func: funcOrValue,
                                     isFactory: isInFactory,
-                                    hasCallbackArg: this._hasCallbackArg(funcOrValue)
+                                    args: this._getArgs(funcOrValue)
                                 }
                                 : { value: funcOrValue };
 
@@ -148,12 +149,14 @@ Di.prototype = {
 
         return this;
     },
-    _hasCallbackArg: function (func) {
+    _getArgs: function (func) {
 
         var funcStr = func.toString(),
             match = funcStr.match(/^function\s*[^(]*\(\s*([^)]*)\)/m) || funcStr.match(/^\(?\s*([^)=]*)\)?\s*=/m);
 
-        return match[1].split(',').length >= 2;
+        return match[1].split(',').map(function (arg) {
+            return arg.trim();
+        });
 
     },
     /**
@@ -180,26 +183,16 @@ Di.prototype = {
         var definition = this._definitions[id],
             isFuncDefinition = Object.keys(definition).indexOf('func') !== -1;
 
-        switch (true) {
-            case !isFuncDefinition:
-                return definition.value;
-            case definition.hasCallbackArg:
-                if (arguments.length < 2 || typeof arguments[1] !== 'function') {
-                    throw new Error('Expected callback function with callback registered value');
-                }
-                this._getCbFn(definition, arguments[1]);
-                return undefined;
-            default:
-                if (arguments.length > 1) {
-                    throw new Error('Unexpected callback with no-callback registered value');
-                }
-                return this._getFn(definition);
+        if (!isFuncDefinition) {
+            return definition.value;
         }
+
+        return this._getFn(definition);
     },
     _getFn: function (definition) {
         var hasValue = Object.keys(definition).indexOf('value') !== -1;
 
-        var value = hasValue && !definition.isFactory ? definition.value : definition.func(this);
+        var value = hasValue && !definition.isFactory ? definition.value : this._call(definition);
 
         if (!hasValue && !definition.isFactory) {
             definition.value = value;
@@ -207,44 +200,21 @@ Di.prototype = {
 
         return value;
     },
-    _getCbFn: function (definition, callback) {
-        var hasValue = Object.keys(definition).indexOf('value') !== -1;
+    _call: function (definition) {
 
-        if (hasValue && !definition.isFactory) {
-            callback(null, definition.value);
-            return;
-        }
+        var that = this;
 
-        if (definition.isFactory) {
-            this._execCbFn(definition.func, [callback]);
-            return;
-        }
+        var argsValue = definition.args.map(function (arg) {
 
-        if (typeof definition.callbacks === 'undefined') {
-            definition.callbacks = [function (err, value) {
-                if (!err) {
-                    definition.value = value;
-                }
-                delete definition.callbacks;
-            }, callback];
-            this._execCbFn(definition.func, definition.callbacks);
-            return;
-        }
+            if (!that.has(arg) && definition.args.length === 1) {
+                arg = 'di'; // Compatibility
+            }
 
-        definition.callbacks.push(callback);
-    },
-    _execCbFn: function (func, listeners) {
-        var callListeners = function (err, value) {
-            listeners.forEach(function (callback) {
-                err ? callback(err) : callback(err, value);
-            });
-        };
+            return that.get(arg);
 
-        try {
-            func(this, callListeners);
-        } catch (e) {
-            callListeners(e);
-        }
+        });
+
+        return definition.func.apply(this, argsValue);
     },
     /**
         Create a factory function
