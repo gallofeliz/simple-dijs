@@ -10,12 +10,12 @@
     "node": ">=0.12"
   },
   "bugs": {
-    "url": "https://github.com/avighier/simple-dijs/issues"
+    "url": "https://github.com/gallofeliz/simple-dijs/issues"
   },
-  "homepage": "https://github.com/avighier/simple-dijs",
+  "homepage": "https://github.com/gallofeliz/simple-dijs",
   "repository": {
     "type": "git",
-    "url": "git://github.com/avighier/simple-dijs.git"
+    "url": "git://github.com/gallofeliz/simple-dijs.git"
   },
   "keywords": [
     "dependency",
@@ -26,7 +26,7 @@
     "pimple",
     "container"
   ],
-  "author": "Aubin VIGHIER",
+  "author": "Gallo Feliz",
   "license": "ISC",
   "devDependencies": {
     "browserify": "^13.0.1",

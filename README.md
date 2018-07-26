@@ -2,8 +2,8 @@
 
 Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
 
-[![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
-[![npm](https://img.shields.io/github/issues-raw/avighier/simple-dijs/bug.svg?label=bugs)](https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![Build Status](https://travis-ci.org/gallofeliz/simple-dijs.svg?branch=master)](https://travis-ci.org/gallofeliz/simple-dijs)
+[![npm](https://img.shields.io/github/issues-raw/gallofeliz/simple-dijs/bug.svg?label=bugs)](https://github.com/gallofeliz/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![npm](https://img.shields.io/npm/dm/simple-dijs.svg)](http://www.npm-stats.com/~packages/simple-dijs)
 
 ## Installation
@@ -14,7 +14,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
     npm install --save simple-dijs
 ```
 
-- from github releases https://github.com/avighier/simple-dijs/releases/latest (downloads)
+- from github releases https://github.com/gallofeliz/simple-dijs/releases/latest (downloads)
 
 ## Integration
 
@@ -44,7 +44,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
         'database': function () { ... },
         'userCollection': function (di) { ... }
     });
-    
+
     di.set('database', function () {
         return new Database();
     });
@@ -52,27 +52,27 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
     di.set('userCollection', function (di) {
         return new UserCollection(di.get('database'));
     });
-    
+
     // Or multiple services
     di.batchSet({ ..same than construct.. });
 
     // So, ...
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // The same UserCollection instance
-   
+
     // If you want to factory instead of return the same object :
     di.set('userCollection', di.factory(function (di) {
         return new UserCollection(di.get('database'));
     }));
-    
+
     // So, ...
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // Other UserCollection instance now, instanciated now !
-    
+
     // You can store raw values
     di.set('port', 80);
     di.get('port'); // 80
-    
+
     // Protect function you want to register raw :
     di.set('math.add', di.protected(function (a, b) {
         return a + b;
@@ -89,11 +89,11 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
     });
 
     // You can use promise (native or not)
-    
+
     di.set('async', function () {
         return new Promise(/*Blabla*/);
     });
-    
+
     di.get('async').then(function () {
         // ...
     });
@@ -107,15 +107,15 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
 - A complete build is configured. Always green before release
 - Tests are written before code (TDD) : The what before the how
 - Uses the http://semver.org/ versionning
-- Please **report issues** and suggestions https://github.com/avighier/simple-dijs/issues
-- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/avighier/simple-dijs.svg?style=social&label=Watch)](https://github.com/avighier/simple-dijs)
-- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/avighier/simple-dijs.svg?style=social&label=Star)](https://github.com/avighier/simple-dijs)
+- Please **report issues** and suggestions https://github.com/gallofeliz/simple-dijs/issues
+- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/gallofeliz/simple-dijs.svg?style=social&label=Watch)](https://github.com/gallofeliz/simple-dijs)
+- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/gallofeliz/simple-dijs.svg?style=social&label=Star)](https://github.com/gallofeliz/simple-dijs)
 
 ## API Reference
 <a name="Di"></a>
 
 ### Di
-**Kind**: global class  
+**Kind**: global class
 
 * [Di](#Di)
     * [new Di([values])](#new_Di_new)
@@ -143,11 +143,11 @@ Create a new Container
 | --- | --- | --- |
 | [values] | <code>Object.&lt;string, \*&gt;</code> | Values to set on construction (eqiv batchSet [batchSet](#Di+batchSet)) |
 
-**Example**  
+**Example**
 ```js
 var di = new Di()
 ```
-**Example**  
+**Example**
 ```js
 var di = new Di({
   id1: value1,
@@ -162,8 +162,8 @@ var di = new Di({
 #### di.batchSet(values) ⇒ <code>[Di](#Di)</code>
 Multiple set values
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>[Di](#Di)</code> - himself  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>[Di](#Di)</code> - himself
 **Throws**:
 
 - <code>Error</code> If values is not provided or not Object
@@ -173,7 +173,7 @@ Multiple set values
 | --- | --- | --- |
 | values | <code>Object.&lt;string, \*&gt;</code> | Values to set |
 
-**Example**  
+**Example**
 ```js
 di.batchset({
    id1: value1,
@@ -188,20 +188,20 @@ di.batchset({
 #### di.factory(func) ⇒ <code>function</code>
 Create a factory function
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>function</code> - The same function  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>function</code> - The same function
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
 - <code>Error</code> Protected function
 
-**See**: Di#set  
+**See**: Di#set
 
 | Param | Type | Description |
 | --- | --- | --- |
 | func | <code>function</code> | The function to factory |
 
-**Example**  
+**Example**
 ```js
 di.set('token', di.factory(function () {
   return new Token();
@@ -215,7 +215,7 @@ di.set('token', di.factory(function () {
 #### di.get(id, callback) ⇒ <code>undefined</code>
 Get a value asynchronously with callback (registered with callback)
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
+**Kind**: instance method of <code>[Di](#Di)</code>
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
@@ -229,7 +229,7 @@ Get a value asynchronously with callback (registered with callback)
 | id | <code>string</code> | The value id |
 | callback | <code>function</code> | The callback |
 
-**Example**  
+**Example**
 ```js
 di.get('database', function (err, database) {
    if (err) {
@@ -246,8 +246,8 @@ di.get('database', function (err, database) {
 #### di.get(id) ⇒ <code>\*</code>
 Get a value synchronously
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>\*</code> - The value  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>\*</code> - The value
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
@@ -259,7 +259,7 @@ Get a value synchronously
 | --- | --- | --- |
 | id | <code>string</code> | The value id |
 
-**Example**  
+**Example**
 ```js
 di.get('database').find(userId)
 ```
@@ -271,14 +271,14 @@ di.get('database').find(userId)
 #### di.has(id) ⇒ <code>boolean</code>
 Check that the container owns the provided id
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>boolean</code> - If id is owned by the container  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>boolean</code> - If id is owned by the container
 
 | Param | Type | Description |
 | --- | --- | --- |
 | id | <code>string</code> | Id to check |
 
-**Example**  
+**Example**
 ```js
 di.has('database') || di.set('database', ...)
 ```
@@ -290,8 +290,8 @@ di.has('database') || di.set('database', ...)
 #### di.keys() ⇒ <code>Array.&lt;string&gt;</code>
 Get all the ids
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>Array.&lt;string&gt;</code> - the ids  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>Array.&lt;string&gt;</code> - the ids
 
 -
 
@@ -300,20 +300,20 @@ Get all the ids
 #### di.protect(func) ⇒ <code>function</code>
 Protect a function to store as raw
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>function</code> - The same function  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>function</code> - The same function
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
 - <code>Error</code> Factory function
 
-**See**: Di#set  
+**See**: Di#set
 
 | Param | Type | Description |
 | --- | --- | --- |
 | func | <code>function</code> | The function to factory |
 
-**Example**  
+**Example**
 ```js
 di.set('math.add', di.protect(function (a, b) {
   return a + b;
@@ -327,7 +327,7 @@ di.set('math.add', di.protect(function (a, b) {
 #### ~~di.register()~~
 ***Deprecated***
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
+**Kind**: instance method of <code>[Di](#Di)</code>
 
 -
 
@@ -336,8 +336,8 @@ di.set('math.add', di.protect(function (a, b) {
 #### di.remove(id) ⇒ <code>[Di](#Di)</code>
 Remove a value
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Returns**: <code>[Di](#Di)</code> - himself  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Returns**: <code>[Di](#Di)</code> - himself
 **Throws**:
 
 - <code>Error</code> Missing or incorrect argument
@@ -348,7 +348,7 @@ Remove a value
 | --- | --- | --- |
 | id | <code>string</code> | The value id |
 
-**Example**  
+**Example**
 ```js
 di.remove('database')
 ```
@@ -365,9 +365,9 @@ In case you use a function to factory your value :
    - you can register your value (for example for asynchronous) by declaring and
 calling the second possible argument "callback", as a normal node callback.
 
-**Kind**: instance method of <code>[Di](#Di)</code>  
-**Summary**: Set a value in the container, synchronously or asynchronously  
-**Returns**: <code>[Di](#Di)</code> - himself  
+**Kind**: instance method of <code>[Di](#Di)</code>
+**Summary**: Set a value in the container, synchronously or asynchronously
+**Returns**: <code>[Di](#Di)</code> - himself
 **Throws**:
 
 - <code>Error</code> if missing or incorrect arguments
@@ -379,29 +379,29 @@ calling the second possible argument "callback", as a normal node callback.
 | id | <code>string</code> | The id of value |
 | funcOrValue | <code>\*</code> | The value |
 
-**Example** *(Set a raw value)*  
+**Example** *(Set a raw value)*
 ```js
 di.set('color', '#ff0000')
 ```
-**Example** *(Set a building function (value with be cached after first call))*  
+**Example** *(Set a building function (value with be cached after first call))*
 ```js
 di.set('database', function (di) {
   return new Database(di.get('database_url'));
 })
 ```
-**Example** *(Set a factory function (value will be factoryed each call))*  
+**Example** *(Set a factory function (value will be factoryed each call))*
 ```js
 di.set('token', di.factory(function () {
   return new Token();
 }))
 ```
-**Example** *(Set a building function that returns a promise)*  
+**Example** *(Set a building function that returns a promise)*
 ```js
 di.set('config', function () {
   return fsPromise.readFile('config.json');
 })
 ```
-**Example** *(Set a building function that use callback for async)*  
+**Example** *(Set a building function that use callback for async)*
 ```js
 di.set('config', function (di, callback) {
   fs.readFile('config.json', callback);

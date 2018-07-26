@@ -2,8 +2,8 @@
 
 Simple Javascript Dependency Injection Container (DI) like Pimple, well tested browser/node - callbacks compatible
 
-[![Build Status](https://travis-ci.org/avighier/simple-dijs.svg?branch=master)](https://travis-ci.org/avighier/simple-dijs)
-[![npm](https://img.shields.io/github/issues-raw/avighier/simple-dijs/bug.svg?label=bugs)](https://github.com/avighier/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![Build Status](https://travis-ci.org/gallofeliz/simple-dijs.svg?branch=master)](https://travis-ci.org/gallofeliz/simple-dijs)
+[![npm](https://img.shields.io/github/issues-raw/gallofeliz/simple-dijs/bug.svg?label=bugs)](https://github.com/gallofeliz/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![npm](https://img.shields.io/npm/dm/simple-dijs.svg)](http://www.npm-stats.com/~packages/simple-dijs)
 
 ## Installation
@@ -14,7 +14,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
     npm install --save simple-dijs
 ```
 
-- from github releases https://github.com/avighier/simple-dijs/releases/latest (downloads)
+- from github releases https://github.com/gallofeliz/simple-dijs/releases/latest (downloads)
 
 ## Integration
 
@@ -44,7 +44,7 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
         'database': function () { ... },
         'userCollection': function (di) { ... }
     });
-    
+
     di.set('database', function () {
         return new Database();
     });
@@ -52,27 +52,27 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
     di.set('userCollection', function (di) {
         return new UserCollection(di.get('database'));
     });
-    
+
     // Or multiple services
     di.batchSet({ ..same than construct.. });
 
     // So, ...
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // The same UserCollection instance
-   
+
     // If you want to factory instead of return the same object :
     di.set('userCollection', di.factory(function (di) {
         return new UserCollection(di.get('database'));
     }));
-    
+
     // So, ...
     di.get('userCollection').find(1); // UserCollection instanciated now !
     di.get('userCollection').find(1); // Other UserCollection instance now, instanciated now !
-    
+
     // You can store raw values
     di.set('port', 80);
     di.get('port'); // 80
-    
+
     // Protect function you want to register raw :
     di.set('math.add', di.protected(function (a, b) {
         return a + b;
@@ -89,11 +89,11 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
     });
 
     // You can use promise (native or not)
-    
+
     di.set('async', function () {
         return new Promise(/*Blabla*/);
     });
-    
+
     di.get('async').then(function () {
         // ...
     });
@@ -107,9 +107,9 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
 - A complete build is configured. Always green before release
 - Tests are written before code (TDD) : The what before the how
 - Uses the http://semver.org/ versionning
-- Please **report issues** and suggestions https://github.com/avighier/simple-dijs/issues
-- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/avighier/simple-dijs.svg?style=social&label=Watch)](https://github.com/avighier/simple-dijs)
-- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/avighier/simple-dijs.svg?style=social&label=Star)](https://github.com/avighier/simple-dijs)
+- Please **report issues** and suggestions https://github.com/gallofeliz/simple-dijs/issues
+- Please **watch** the github project if you **use** [![GitHub watchers](https://img.shields.io/github/watchers/gallofeliz/simple-dijs.svg?style=social&label=Watch)](https://github.com/gallofeliz/simple-dijs)
+- Please **star** the github project if you **like** [![GitHub stars](https://img.shields.io/github/stars/gallofeliz/simple-dijs.svg?style=social&label=Star)](https://github.com/gallofeliz/simple-dijs)
 
 ## API Reference
 {{>main}}
