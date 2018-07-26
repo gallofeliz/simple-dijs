@@ -92,9 +92,9 @@ gulp.task('copy-paste-check', ['lint'], function (cb) {
 
 gulp.task('nodes-test', ['build-dist'], function (cb) {
     var versions = [
-        '0.12', // legacy
-        '4.5', // Current LTS (--lts option seems to not work)
-        'node' // Current stable (6.4)
+        '0.12',
+        '4.5',
+        'lts/*'
     ];
 
     var buildCmd = './node_modules/.bin/gulp node-test';
