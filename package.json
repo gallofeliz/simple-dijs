@@ -1,6 +1,6 @@
 {
   "name": "simple-dijs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Simple Javascript Dependency Injection Container (DI) like Pimple",
   "main": "dist/di.js",
   "directories": {
