@@ -45,6 +45,31 @@ describe('Di', function () {
             assert.strictEqual(di.get('myId'), 'something');
             assert.strictEqual(di.get('myId2'), 'something-else');
         });
+
+        try {
+
+            // Test ES6 functions
+
+            eval(
+                ' it("Call (ES6)", function () {' +
+                '     var returned = di.batchSet({' +
+                '         myId: () => "something",' +
+                '         myId2: myId => { return myId + "-else"; },' +
+                '         myId3 (myId2) {' +
+                '             return myId2 + "2";' +
+                '         }' +
+                '     });' +
+                ' ' +
+                '     assert.strictEqual(returned, di);' +
+                '     assert.strictEqual(di.get("myId"), "something");' +
+                '     assert.strictEqual(di.get("myId2"), "something-else");' +
+                '     assert.strictEqual(di.get("myId3"), "something-else2");' +
+                ' });'
+            );
+
+        } catch (e) {
+        }
+
     });
 
     describe('#set', function () {

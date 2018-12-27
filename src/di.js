@@ -152,11 +152,17 @@ Di.prototype = {
     _getArgs: function (func) {
 
         var funcStr = func.toString(),
-            match = funcStr.match(/^function\s*[^(]*\(\s*([^)]*)\)/m) || funcStr.match(/^\(?\s*([^)=]*)\)?\s*=/m);
+            match = funcStr.match(/^function\s*[^(]*\(\s*([^)]*)\)/m) ||
+                funcStr.match(/^\(?\s*([^)=]*)\)?\s*=/m) ||
+                funcStr.match(/^[^(]+\(([^)]*)\)\s*{/m);
 
-        return match[1].split(',').map(function (arg) {
-            return arg.trim();
-        });
+        const matchArgs = match[1].trim();
+
+        return matchArgs === ''
+            ? []
+            : matchArgs.split(',').map(function (arg) {
+                return arg.trim();
+            });
 
     },
     /**
