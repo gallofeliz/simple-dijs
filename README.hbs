@@ -4,7 +4,6 @@ Simple Javascript Dependency Injection Container (DI) like Pimple, well tested b
 
 NOTE : this is V2. The V2 doesn't support callback anymore and can broke compatibity with old node versions in the future. Please use the v1 if you need to use callbacks or old node version.
 
-[![Build Status](https://travis-ci.org/gallofeliz/simple-dijs.svg?branch=master)](https://travis-ci.org/gallofeliz/simple-dijs)
 [![npm](https://img.shields.io/github/issues-raw/gallofeliz/simple-dijs/bug.svg?label=bugs)](https://github.com/gallofeliz/simple-dijs/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
 [![npm](https://img.shields.io/npm/dm/simple-dijs.svg)](http://www.npm-stats.com/~packages/simple-dijs)
 

@@ -23,7 +23,7 @@ gulp.task('default', ['build']);
 // Build is checking and then building dist files : di.js and di.min.js
 gulp.task('build', ['checks', 'build-dist', 'build-minify', 'build-readme']);
 // Checking is syntax check, then test raw code with code coverage, and then test on target platforms
-gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'nodes-test', 'npm-check']);
+gulp.task('checks', ['lint', 'copy-paste-check', 'test', 'browser-test', 'npm-check']);
 // Checking package content, publish on NPM and building ZIP to publish on Github
 gulp.task('publish', ['build', 'check-package', '_publish-npm', '_publish_github']);
 
@@ -88,37 +88,6 @@ gulp.task('copy-paste-check', ['lint'], function (cb) {
             'identifiers': false
         }));
 
-});
-
-gulp.task('nodes-test', ['build-dist'], function (cb) {
-    var versions = [
-        '4.5',
-        'lts/*'
-    ];
-
-    var buildCmd = './node_modules/.bin/gulp node-test';
-
-    var cmd = versions.map(function (version) {
-        return 'nvm use ' + version + ' && ' + buildCmd;
-    }).join(' && ');
-
-    cmd = '. ~/.nvm/nvm.sh 2>/dev/null ; ' + cmd;
-
-    exec(cmd, function (error, stdout, stderr) {
-        gutil.log(stdout);
-        gutil.log(stderr);
-        if (error) {
-            cb(error);
-            return;
-        }
-        cb();
-    });
-});
-
-gulp.task('node-test', function () {
-    return gulp.src(['test/di.js'])
-            .pipe(replace(/src\/di/, 'dist/di'))
-            .pipe(mocha());
 });
 
 gulp.task('browser-test', ['build-minify'], function (cb) {

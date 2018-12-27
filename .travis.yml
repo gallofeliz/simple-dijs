@@ -1,8 +1,0 @@
-language: node_js
-node_js:
-  - "node"
-install:
-    - nvm install 4.5
-    - nvm install lts/*
-    - npm install
-script: node_modules/.bin/gulp build
