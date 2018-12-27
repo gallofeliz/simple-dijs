@@ -92,7 +92,6 @@ gulp.task('copy-paste-check', ['lint'], function (cb) {
 
 gulp.task('nodes-test', ['build-dist'], function (cb) {
     var versions = [
-        '0.12',
         '4.5',
         'lts/*'
     ];
