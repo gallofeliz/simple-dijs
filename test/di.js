@@ -57,6 +57,10 @@ describe('Di', function () {
                 '         myId2: myId => { return myId + "-else"; },' +
                 '         myId3 (myId2) {' +
                 '             return myId2 + "2";' +
+                '         },' +
+                '         myId4(myId3) {\n' +
+                '             const prefix = "prefix-";\n' +
+                '             return prefix + myId3\n' +
                 '         }' +
                 '     });' +
                 ' ' +
@@ -64,6 +68,7 @@ describe('Di', function () {
                 '     assert.strictEqual(di.get("myId"), "something");' +
                 '     assert.strictEqual(di.get("myId2"), "something-else");' +
                 '     assert.strictEqual(di.get("myId3"), "something-else2");' +
+                '     assert.strictEqual(di.get("myId4"), "prefix-something-else2");' +
                 ' });'
             );
 

@@ -153,8 +153,8 @@ Di.prototype = {
 
         var funcStr = func.toString(),
             match = funcStr.match(/^function\s*[^(]*\(\s*([^)]*)\)/m) ||
-                funcStr.match(/^\(?\s*([^)=]*)\)?\s*=/m) ||
-                funcStr.match(/^[^(]+\(([^)]*)\)\s*{/m);
+                funcStr.match(/^[^(]+\(([^)]*)\)\s*{/m) ||
+                funcStr.match(/^\(?\s*([^)=]*)\)?\s*=/m);
 
         const matchArgs = match[1].trim();
 
