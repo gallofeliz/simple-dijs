@@ -9,13 +9,9 @@ NOTE : this is V2. The V2 doesn't support callback anymore and can broke compati
 
 ## Installation
 
-- You can install from NPM
-
 ```bash
     npm install --save simple-dijs
 ```
-
-- from github releases https://github.com/gallofeliz/simple-dijs/releases/latest (downloads)
 
 ## Integration
 
